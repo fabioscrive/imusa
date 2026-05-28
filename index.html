@@ -192,7 +192,8 @@
 
   /* AUTORE */
   .autore-section { padding:8rem 6rem;border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:5rem;align-items:center; }
-  .autore-initial { width:110px;height:110px;border:1px solid var(--amber);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:2.8rem;color:var(--amber);flex-shrink:0; }
+  .autore-initial { width:160px;height:200px;border:1px solid var(--amber);overflow:hidden;flex-shrink:0;position:relative; }
+  .autore-initial img { width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:grayscale(100%) contrast(1.05); }
   .autore-text h3 { font-family:'DM Serif Display',serif;font-size:1.9rem;margin-bottom:.25rem; }
   .autore-role { font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.3em;color:var(--amber);text-transform:uppercase;margin-bottom:1.3rem; }
   .autore-text p { font-size:.97rem;line-height:1.85;color:rgba(240,237,230,.58);max-width:540px; }
@@ -402,7 +403,7 @@
 
 <!-- ═══ AUTORE ═══ -->
 <section class="autore-section reveal" id="autore">
-  <div class="autore-initial">FB</div>
+  <div class="autore-initial"><img src="autore_B_N.png" alt="Fabio Bisesti"></div>
   <div class="autore-text">
     <h3>Fabio Bisesti</h3>
     <div class="autore-role">Autore</div>
