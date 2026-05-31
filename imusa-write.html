@@ -337,7 +337,7 @@
       <li><a onclick="showPage('terminal')" id="nav-terminal" class="active">Terminale</a></li>
       <li><a onclick="showPage('write')" id="nav-write">Scrivi</a></li>
       <li><a onclick="showPage('library')" id="nav-library">Libri</a></li>
-      <li><a href="admin.html" style="color:var(--amber-dark);">⚙ Configura</a></li>
+
     </ul>
   </nav>
 
@@ -499,7 +499,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════
-let userName = localStorage.getItem('imusa_user_name') || '';
+let userName = '';
 let currentStory = null;
 let currentCoverUrl = '';
 let dirHandle = null;      // FileSystemDirectoryHandle (File System Access API)
@@ -672,7 +672,6 @@ function submitName() {
   const name = input.value.trim();
   if (!name) { showToast('Inserisci il tuo nome.', 'error'); return; }
   userName = name;
-  localStorage.setItem('imusa_user_name', name);
 
   const body = document.getElementById('terminal-body');
   body.innerHTML += `
@@ -726,8 +725,11 @@ async function generateStory() {
     loadingText.textContent = 'I-Musa sta leggendo la tua idea...';
     const storyText = await generateStoryText(title, prompt);
 
-    loadingText.textContent = 'I-Musa sta disegnando la copertina...';
-    const coverUrl = await generateCover(title, prompt);
+    // Usa cover.jpg dal repository GitHub configurato
+    const gh = getGHConfig();
+    const coverUrl = gh
+      ? `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/cover.jpg`
+      : '';
     currentCoverUrl = coverUrl;
 
     // Store current story
@@ -1146,19 +1148,7 @@ function esc(s) {
 // ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
-if (userName) {
-  // Skip to write page if already known
-  document.getElementById('terminal-body').innerHTML = `
-    <span class="t-line"><span class="t-prompt">// </span><span class="t-amber">connessione stabilita</span></span>
-    <span class="t-line">&nbsp;</span>
-    <span class="t-line t-text fade-in">Bentornato, ${esc(userName)}.</span>
-    <span class="t-line t-text fade-in" style="animation-delay:.3s">I-Musa è pronta.</span>
-    <span class="t-line">&nbsp;</span>
-    <div class="t-input-line fade-in" style="animation-delay:.6s">
-      <button class="t-btn" onclick="startWriting()" style="margin:0 auto;">Inizia a scrivere →</button>
-    </div>
-  `;
-}
+
 
 // Restore remembered dir name label (handle must be re-picked each session)
 const savedDirName = localStorage.getItem('imusa_dir_name');

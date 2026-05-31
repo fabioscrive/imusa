@@ -209,6 +209,39 @@
   .confirm-msg { font-size:.9rem; color:var(--muted); line-height:1.6; margin-bottom:2rem; }
   .confirm-btns { display:flex; gap:1rem; justify-content:center; }
 
+  /* ── EDIT MODAL ── */
+  #edit-modal {
+    display:none; position:fixed; inset:0; z-index:500;
+    background:rgba(10,10,10,.96); align-items:flex-start; justify-content:center;
+    overflow-y:auto; padding:3rem 1rem;
+  }
+  #edit-modal.open { display:flex; }
+  .edit-box {
+    background:var(--terminal-bg); border:1px solid var(--border);
+    padding:2.5rem; width:100%; max-width:720px;
+  }
+  .edit-box-title {
+    font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.2em;
+    color:var(--amber); text-transform:uppercase; margin-bottom:1.5rem;
+    padding-bottom:.8rem; border-bottom:1px solid var(--border);
+  }
+  .edit-field { margin-bottom:1.4rem; }
+  .edit-field label {
+    display:block; font-family:'DM Mono',monospace; font-size:.62rem;
+    letter-spacing:.2em; color:var(--muted); text-transform:uppercase; margin-bottom:.5rem;
+  }
+  .edit-field input, .edit-field textarea {
+    width:100%; background:var(--black); border:1px solid var(--border);
+    color:var(--off-white); font-family:'Instrument Sans',sans-serif; font-size:.95rem;
+    padding:.75rem 1rem; outline:none; transition:border-color .2s;
+  }
+  .edit-field input:focus, .edit-field textarea:focus { border-color:var(--amber-dark); }
+  .edit-field textarea { min-height:420px; resize:vertical; line-height:1.8; font-family:'DM Serif Display',serif; font-size:1rem; }
+  .edit-author-note {
+    font-family:'DM Mono',monospace; font-size:.6rem; letter-spacing:.1em;
+    color:var(--amber-dark); margin-top:.4rem; font-style:italic;
+  }
+
   /* ── SYNC STATUS ── */
   .gh-status { font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.1em; margin-top:.8rem; }
   .gh-status.ok { color:#4caf50; }
@@ -358,6 +391,32 @@
     <div class="confirm-btns">
       <button class="btn btn-outline" onclick="closeConfirm()">Annulla</button>
       <button class="btn btn-danger" id="confirm-ok-btn">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal">
+  <div class="edit-box">
+    <div class="edit-box-title">✏ Modifica romanzo</div>
+    <input type="hidden" id="edit-book-id">
+    <input type="hidden" id="edit-original-author">
+    <div class="edit-field">
+      <label>Titolo</label>
+      <input type="text" id="edit-title" maxlength="120">
+    </div>
+    <div class="edit-field">
+      <label>Testo del racconto</label>
+      <textarea id="edit-text"></textarea>
+    </div>
+    <div class="edit-field">
+      <label>Autore (al salvataggio)</label>
+      <input type="text" id="edit-author-preview" disabled style="opacity:.6;">
+      <div class="edit-author-note">L'autore sarà: [autore originale] e Leo Vasari</div>
+    </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
+      <button class="btn btn-primary" onclick="saveEditedBook()">💾 Salva e sincronizza</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Annulla</button>
     </div>
   </div>
 </div>
@@ -592,6 +651,7 @@ function loadBooksTable() {
       <td>
         <div class="book-actions">
           <button class="btn btn-outline btn-sm" onclick="previewBook('${esc(b.id)}')">👁 Leggi</button>
+          <button class="btn btn-outline btn-sm" onclick="editBook('${esc(b.id)}')">✏ Modifica</button>
           <button class="btn btn-danger btn-sm" onclick="confirmDelete('${esc(b.id)}','${esc(b.title).replace(/'/g,'&#39;')}')">🗑 Elimina</button>
         </div>
       </td>
@@ -647,6 +707,67 @@ function previewBook(id) {
       <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;line-height:2;color:rgba(240,237,230,.85);white-space:pre-wrap;">${esc(book.text)}</div>
     </div>`;
   document.body.appendChild(overlay);
+}
+
+// ═══════════════════════════════════════
+//  EDIT BOOK
+// ═══════════════════════════════════════
+function editBook(id) {
+  const book = getBooks().find(b => b.id === id);
+  if (!book) return;
+
+  document.getElementById('edit-book-id').value = id;
+  document.getElementById('edit-original-author').value = book.author || '';
+  document.getElementById('edit-title').value = book.title || '';
+  document.getElementById('edit-text').value = book.text || '';
+
+  // Preview della firma che verrà applicata
+  const originalAuthor = book.author || 'Anonimo';
+  // Se l'autore contiene già "Leo Vasari" mostra solo quella parte originale
+  const baseAuthor = originalAuthor.replace(/ e Leo Vasari$/i, '').trim();
+  document.getElementById('edit-author-preview').value = baseAuthor + ' e Leo Vasari';
+
+  document.getElementById('edit-modal').classList.add('open');
+  document.getElementById('edit-title').focus();
+}
+
+async function saveEditedBook() {
+  const id = document.getElementById('edit-book-id').value;
+  const newTitle = document.getElementById('edit-title').value.trim();
+  const newText = document.getElementById('edit-text').value.trim();
+
+  if (!newTitle) { showToast('Il titolo non può essere vuoto.', 'error'); return; }
+  if (!newText)  { showToast('Il testo non può essere vuoto.', 'error'); return; }
+
+  const books = getBooks();
+  const idx = books.findIndex(b => b.id === id);
+  if (idx === -1) { showToast('Libro non trovato.', 'error'); return; }
+
+  const originalAuthor = (books[idx].author || 'Anonimo').replace(/ e Leo Vasari$/i, '').trim();
+
+  books[idx].title  = newTitle;
+  books[idx].text   = newText;
+  books[idx].author = originalAuthor + ' e Leo Vasari';
+  books[idx].editedAt = new Date().toISOString();
+
+  setBooks(books);
+  closeEditModal();
+  loadBooksTable();
+  showToast('Romanzo aggiornato. Sincronizzazione in corso...', 'success');
+
+  try {
+    const gh = getGHConfig();
+    if (gh) {
+      await syncBooksToGithub(gh);
+      showToast('Sincronizzato su GitHub ✓', 'success');
+    }
+  } catch(e) {
+    showToast('Salvato in locale. Errore GitHub: ' + e.message, 'error');
+  }
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
 }
 
 // ═══════════════════════════════════════
