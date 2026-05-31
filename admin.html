@@ -361,7 +361,7 @@
       <div class="config-card-title"><div class="dot"></div> Gestione romanzi</div>
 
       <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
-        <button class="btn btn-outline" onclick="loadBooksTable()">🔄 Aggiorna lista</button>
+        <button class="btn btn-outline" onclick="loadBooksFromGithub().then(loadBooksTable)">🔄 Aggiorna da GitHub</button>
         <button class="btn btn-outline" onclick="syncBooksNow()">↑ Sinc. con GitHub</button>
         <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;" id="books-count"></span>
       </div>
@@ -491,9 +491,24 @@ function getModMsg() {
 function setModMsg(m) { localStorage.setItem('imusa_mod_msg', m); }
 
 // ═══════════════════════════════════════
+//  LOAD BOOKS FROM GITHUB (fonte di verità)
+// ═══════════════════════════════════════
+const BOOKS_JSON_URL = 'https://raw.githubusercontent.com/fabioscrive/imusa/main/books.json';
+
+async function loadBooksFromGithub() {
+  try {
+    const res = await fetch(BOOKS_JSON_URL + '?t=' + Date.now());
+    if (res.ok) {
+      const data = await res.json();
+      if (data.books) setBooks(data.books);
+    }
+  } catch(e) { console.warn('GitHub load error:', e); }
+}
+
+// ═══════════════════════════════════════
 //  LOAD ADMIN DATA
 // ═══════════════════════════════════════
-function loadAdminData() {
+async function loadAdminData() {
   // GitHub config
   const c = getGHConfig();
   if (c) {
@@ -504,7 +519,8 @@ function loadAdminData() {
   }
   // Mod message
   document.getElementById('mod-msg').value = getModMsg();
-  // Books
+  // Carica da GitHub poi mostra tabella
+  await loadBooksFromGithub();
   loadBooksTable();
   // Check gh status
   if (c) showGHStatus('Configurazione caricata: ' + c.owner + '/' + c.repo, 'ok');
@@ -671,12 +687,23 @@ function confirmDelete(id, title) {
   document.getElementById('confirm-ok-btn').onclick = () => doDelete(id);
 }
 
-function doDelete(id) {
+async function doDelete(id) {
   const books = getBooks().filter(b => b.id !== id);
   setBooks(books);
   closeConfirm();
   loadBooksTable();
-  showToast('Romanzo eliminato.', 'success');
+  showToast('Eliminato. Sincronizzazione in corso...', 'success');
+  try {
+    const gh = getGHConfig();
+    if (gh) {
+      await syncBooksToGithub(gh);
+      showToast('Sincronizzato su GitHub ✓', 'success');
+    } else {
+      showToast('Eliminato in locale. Configura GitHub per sincronizzare.', 'error');
+    }
+  } catch(e) {
+    showToast('Errore sync GitHub: ' + e.message, 'error');
+  }
 }
 
 function closeConfirm() {

@@ -773,8 +773,10 @@ async function generateStory() {
 // ══ Generate story text using free AI APIs ══
 async function generateStoryText(title, prompt) {
   const fullPrompt = encodeURIComponent(
-    `Sei I-Musa, un'IA creativa che scrive racconti brevi in italiano. Scrivi un racconto coinvolgente di circa 400-600 parole basato sulla trama fornita. Usa uno stile narrativo elegante e poetico. ` +
-    `Il titolo è: "${title}". Trama: ${prompt}. Scrivi il racconto completo in italiano.`
+    `Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto di massimo 400 parole basato sulla trama fornita. ` +
+    `Usa un linguaggio semplice e diretto, frasi brevi, niente parole ricercate o metafore elaborate. ` +
+    `Racconta solo la storia, senza introduzioni né commenti. ` +
+    `Il titolo è: "${title}". Trama: ${prompt}.`
   );
 
   // ══ POLLINATIONS.AI FREE TEXT API (no key needed) ══
@@ -1201,17 +1203,16 @@ function getGHConfig() { return getImusaGHConfig(); }
 // ═══════════════════════════════════════
 //  LOAD BOOKS FROM GITHUB
 // ═══════════════════════════════════════
+// URL fisso del JSON pubblico — non dipende dalla config localStorage
+const BOOKS_JSON_URL = 'https://raw.githubusercontent.com/fabioscrive/imusa/main/books.json';
+
 async function loadBooksFromGithub() {
-  const gh = getGHConfig();
-  if (!gh) return;
   try {
-    const res = await fetch(
-      `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/books.json?t=${Date.now()}`
-    );
+    const res = await fetch(BOOKS_JSON_URL + '?t=' + Date.now());
     if (res.ok) {
       const data = await res.json();
       if (data.books && data.books.length > 0) {
-        // GitHub è la fonte di verità: merge mantenendo eventuali libri locali non ancora sincronizzati
+        // GitHub è la fonte di verità: merge con eventuali libri locali non ancora sincronizzati
         const local = getBooks();
         const merged = [
           ...data.books,
