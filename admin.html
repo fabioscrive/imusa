@@ -361,7 +361,7 @@
       <div class="config-card-title"><div class="dot"></div> Gestione romanzi</div>
 
       <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
-        <button class="btn btn-outline" onclick="loadBooksFromGithub().then(loadBooksTable)">🔄 Aggiorna da GitHub</button>
+        <button class="btn btn-outline" onclick="loadBooksFromGithub()">🔄 Aggiorna da GitHub</button>
         <button class="btn btn-outline" onclick="syncBooksNow()">↑ Sinc. con GitHub</button>
         <span style="font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;" id="books-count"></span>
       </div>
@@ -505,10 +505,13 @@ async function loadBooksFromGithub() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     setBooks(data.books || []);
+    showToast('Libreria caricata da GitHub ✓', 'success');
   } catch(e) {
     console.warn('GitHub load error:', e);
-    if (wrap) wrap.innerHTML = '<div class="empty-books" style="color:var(--danger);">✗ Errore caricamento da GitHub: ' + e.message + '</div>';
+    showToast('Errore caricamento: ' + e.message, 'error');
   }
+  // Sempre aggiorna la tabella con i dati in cache
+  loadBooksTable();
 }
 
 // ═══════════════════════════════════════
@@ -525,9 +528,8 @@ async function loadAdminData() {
   }
   // Mod message
   document.getElementById('mod-msg').value = getModMsg();
-  // Carica da GitHub poi mostra tabella
+  // Carica da GitHub (chiama loadBooksTable internamente)
   await loadBooksFromGithub();
-  loadBooksTable();
   // Check gh status
   if (c) showGHStatus('Configurazione caricata: ' + c.owner + '/' + c.repo, 'ok');
 }

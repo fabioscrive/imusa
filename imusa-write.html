@@ -438,13 +438,9 @@
         <p style="color:var(--muted);font-size:.95rem;margin-top:.5rem;">Tutte le storie create con I-Musa.</p>
       </div>
 
-      <!-- Directory picker + file scan -->
-      <div id="dir-picker-bar" style="margin-bottom:2rem; background:rgba(13,13,13,.8); border:1px solid var(--border); padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-        <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;color:var(--muted);flex:1;">
-          <span id="dir-label">Nessuna directory selezionata</span>
-        </div>
-        <button class="btn btn-outline" style="padding:.5rem 1.2rem;" onclick="pickDirectory()">📁 Seleziona directory</button>
-        <button class="btn btn-outline" style="padding:.5rem 1.2rem;" onclick="scanDirectory()" id="btn-scan" disabled>🔄 Aggiorna</button>
+      <!-- Refresh from GitHub -->
+      <div style="margin-bottom:2rem; text-align:right;">
+        <button class="btn btn-outline" style="padding:.5rem 1.2rem;" onclick="refreshLibrary()">🔄 Aggiorna da GitHub</button>
       </div>
 
       <div class="bookshelf" id="bookshelf"></div>
@@ -495,15 +491,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 
-// ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-
 // ═══════════════════════════════════════
 let userName = '';
 let currentStory = null;
 let currentCoverUrl = '';
-let dirHandle = null;      // FileSystemDirectoryHandle (File System Access API)
-let scannedBooks = [];     // books found in directory
 
 // In-memory cache — unica fonte di verità (caricata da GitHub)
 let _booksCache = [];
@@ -516,26 +507,14 @@ function getGHConfig() {
 function setGHConfig(c) { localStorage.setItem('imusa_gh_config', JSON.stringify(c)); }
 
 // ═══════════════════════════════════════
-//  FILE SYSTEM — NAMING HELPERS
+//  TXT HELPERS
 // ═══════════════════════════════════════
 
-/** Build filename: book_N_title20chars.txt */
-async function buildBookFilename(title) {
-  let maxN = -1;
-  if (dirHandle) {
-    for await (const [name] of dirHandle.entries()) {
-      const m = name.match(/^book_(\d+)_/);
-      if (m) maxN = Math.max(maxN, parseInt(m[1], 10));
-    }
-  }
-  const n = maxN + 1;
+function buildBookFilename(title) {
   const slug = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim().slice(0, 20).replace(/\s+/g, '_');
-  return `book_${n}_${slug}.txt`;
+  return `book_${Date.now()}_${slug}.txt`;
 }
 
-function addToLocalIndex(filename) { /* no-op: index no longer stored locally */ }
-
-/** Build TXT content for a story */
 function buildTxtContent(story) {
   const lines = [
     story.title,
@@ -554,77 +533,17 @@ function buildTxtContent(story) {
   return lines.join('\n');
 }
 
-// ═══════════════════════════════════════
-//  FILE SYSTEM ACCESS API — SAVE
-// ═══════════════════════════════════════
-
-/** Try to save story as TXT in the chosen directory (or download) */
-async function saveStoryAsTxt(story) {
-  const filename = await buildBookFilename(story.title);
+/** Download story as TXT (browser download) */
+function saveStoryAsTxt(story) {
+  const filename = buildBookFilename(story.title);
   const content = buildTxtContent(story);
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-
-  if (dirHandle) {
-    try {
-      const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
-      const writable = await fileHandle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-      addToLocalIndex(filename);
-      showToast('📄 Salvato: ' + filename, 'success');
-      return filename;
-    } catch(e) {
-      console.warn('Directory write failed:', e);
-    }
-  }
-
-  // Fallback: browser download
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = filename;
   a.click();
-  addToLocalIndex(filename);
   showToast('📥 Download: ' + filename, 'success');
   return filename;
-}
-
-// ═══════════════════════════════════════
-//  DIRECTORY PICKER + SCAN
-// ═══════════════════════════════════════
-
-async function pickDirectory() {
-  if (!window.showDirectoryPicker) {
-    showToast('Il tuo browser non supporta la scelta della directory. I file verranno scaricati automaticamente.', 'error');
-    return;
-  }
-  try {
-    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    document.getElementById('dir-label').textContent = '📂 ' + dirHandle.name;
-    document.getElementById('btn-scan').disabled = false;
-    localStorage.setItem('imusa_dir_name', dirHandle.name);
-    await scanDirectory();
-  } catch(e) {
-    if (e.name !== 'AbortError') showToast('Errore: ' + e.message, 'error');
-  }
-}
-
-async function scanDirectory() {
-  if (!dirHandle) { renderLibrary(); return; }
-  scannedBooks = [];
-  try {
-    for await (const [name, handle] of dirHandle.entries()) {
-      if (name.match(/^book_\d+_.*\.txt$/i)) {
-        scannedBooks.push({ filename: name, handle });
-      }
-    }
-    // Sort by number
-    scannedBooks.sort((a, b) => {
-      const na = parseInt(a.filename.match(/^book_(\d+)_/)?.[1] || 0);
-      const nb = parseInt(b.filename.match(/^book_(\d+)_/)?.[1] || 0);
-      return na - nb;
-    });
-  } catch(e) { console.warn('Scan failed:', e); }
-  renderLibrary();
 }
 
 // ═══════════════════════════════════════
@@ -638,10 +557,15 @@ async function showPage(id) {
   if (id === 'library') {
     await loadBooksFromGithub();
     renderLibrary();
-    if (dirHandle) scanDirectory();
   }
   if (id === 'config') loadGHConfigForm();
   window.scrollTo(0, 0);
+}
+
+async function refreshLibrary() {
+  await loadBooksFromGithub();
+  renderLibrary();
+  showToast('Libreria aggiornata da GitHub', 'success');
 }
 
 // ═══════════════════════════════════════
@@ -835,21 +759,20 @@ async function saveStory() {
   if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio...'; }
 
   try {
-    // 1. Save TXT file in the chosen directory (or download)
-    const txtFilename = await saveStoryAsTxt(currentStory);
+    // 1. Download TXT file
+    const txtFilename = saveStoryAsTxt(currentStory);
     currentStory.txtFilename = txtFilename;
 
-    // 2. Aggiunge al cache in memoria
+    // 2. Aggiungi al cache in memoria
     const books = getBooks();
     if (!books.find(b => b.id === currentStory.id)) {
       books.unshift(currentStory);
       setBooks(books);
     }
 
-    showToast('Storia pubblicata! 📄 ' + txtFilename, 'success');
     if (btn) { btn.textContent = '✓ Pubblicato'; }
 
-    // 3. Auto-sync to GitHub (silently, if configured)
+    // 3. Sync to GitHub
     try {
       await syncBooksToGithub();
       showToast('Sincronizzato su GitHub ✓', 'success');
@@ -889,35 +812,6 @@ function renderLibrary() {
       <button onclick="${onRead}" class="btn btn-outline" style="flex:1;padding:.45rem .5rem;font-size:.58rem;">📖 Leggi</button>
       <button onclick="${onDownload}" class="btn btn-outline" style="flex:1;padding:.45rem .5rem;font-size:.58rem;">⬇ Scarica</button>
     </div>`;
-
-  if (scannedBooks.length > 0) {
-    empty.style.display = 'none';
-    shelf.innerHTML = scannedBooks.map((entry, i) => {
-      const slug = entry.filename.replace(/^book_\d+_/, '').replace(/\.txt$/i, '').replace(/_/g, ' ');
-      const local = localBooks.find(b => b.title.toLowerCase().includes(slug.toLowerCase().slice(0, 10)));
-      const coverStyle = local?.coverUrl
-        ? `background:url('${esc(local.coverUrl)}') center/cover no-repeat`
-        : 'background:linear-gradient(135deg,#0a0a0a 0%,#1a1510 50%,#0a0a0a 100%)';
-      const dispTitle = local?.title || slug;
-      const dispAuthor = local?.author || '';
-      return `
-        <div class="book-card">
-          <div class="book-card-cover" style="${coverStyle}">
-            ${!local?.coverUrl ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem;background:linear-gradient(to top,rgba(10,10,10,.95) 0%,transparent 60%);pointer-events:none;">
-              <div style="font-family:'DM Serif Display',serif;font-size:1rem;color:var(--off-white);text-align:center;line-height:1.2;">${esc(dispTitle)}</div>
-              <div style="font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.12em;color:var(--amber);text-align:center;margin-top:.3rem;text-transform:uppercase;">${dispAuthor ? esc(dispAuthor) + ' e I-Musa' : 'I-Musa'}</div>
-            </div>` : ''}
-          </div>
-          <div class="book-card-info">
-            <div class="book-card-title">${esc(dispTitle)}</div>
-            <div class="book-card-author">${dispAuthor ? esc(dispAuthor) + ' e I-Musa' : 'I-Musa'}</div>
-            <div class="book-card-date" style="color:var(--amber-dark);font-size:.5rem;margin-top:.4rem;">📄 ${esc(entry.filename)}</div>
-          </div>
-          ${cardActions(`openTxtReader(scannedBooks[${i}])`, `downloadTxtEntry(scannedBooks[${i}])`)}
-        </div>`;
-    }).join('');
-    return;
-  }
 
   if (localBooks.length === 0) {
     shelf.innerHTML = '';
@@ -975,31 +869,6 @@ function readBook(id) {
   document.getElementById('reader-modal').scrollTop = 0;
 }
 
-async function openTxtReader(entry) {
-  let text = '';
-  try {
-    const file = await entry.handle.getFile();
-    text = await file.text();
-  } catch(e) { text = 'Impossibile leggere il file.'; }
-
-  const lines = text.split('\n');
-  const title = lines[0] || entry.filename;
-  const authorLine = lines.find(l => l.startsWith('Autore:')) || '';
-  const author = authorLine.replace('Autore:', '').trim();
-
-  currentReaderBook = { title, author, text, txtFilename: entry.filename, coverUrl: null, date: null };
-
-  document.getElementById('reader-filename').textContent = entry.filename;
-  document.getElementById('reader-title').textContent = title;
-  document.getElementById('reader-author').textContent = author;
-  document.getElementById('reader-body').textContent = text;
-  document.getElementById('reader-cover').style.display = 'none';
-
-  document.getElementById('reader-modal').style.display = 'block';
-  document.body.style.overflow = 'hidden';
-  document.getElementById('reader-modal').scrollTop = 0;
-}
-
 function downloadCurrentBook() {
   if (!currentReaderBook) return;
   const content = currentReaderBook.text || buildTxtContent(currentReaderBook);
@@ -1010,18 +879,6 @@ function downloadCurrentBook() {
   a.download = filename;
   a.click();
   showToast('Download: ' + filename, 'success');
-}
-
-async function downloadTxtEntry(entry) {
-  let text = '';
-  try { const file = await entry.handle.getFile(); text = await file.text(); }
-  catch(e) { showToast('Impossibile leggere il file.', 'error'); return; }
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = entry.filename;
-  a.click();
-  showToast('Download: ' + entry.filename, 'success');
 }
 
 function downloadBookById(id) {
@@ -1142,55 +999,9 @@ function esc(s) {
 //  INIT
 // ═══════════════════════════════════════
 
-
-// Restore remembered dir name label (handle must be re-picked each session)
-const savedDirName = localStorage.getItem('imusa_dir_name');
-if (savedDirName) {
-  document.getElementById('dir-label').textContent = '📂 ' + savedDirName + ' (seleziona di nuovo per accedere)';
-}
-
-// Load any existing books from GitHub on startup
-
-// ═══════════════════════════════════════════════════════════════
-//  MODERATION MESSAGE
-// ═══════════════════════════════════════════════════════════════
-function showModMessage() {
-  const msg = getModMsg();
-  // Replace the story result with moderation notice
-  const resultDiv = document.getElementById('story-result');
-  resultDiv.innerHTML = `
-    <div class="form-section" style="text-align:center; padding:3rem;">
-      <div style="font-family:'DM Serif Display',serif; font-size:1.8rem; color:var(--amber); margin-bottom:1rem;">✓ Storia inviata!</div>
-      <div style="font-size:1rem; color:var(--muted); line-height:1.8; max-width:500px; margin:0 auto;">
-        ${esc(msg)}
-      </div>
-      <div style="margin-top:2rem;">
-        <button class="btn btn-outline" onclick="resetStory()">↺ Scrivi un'altra storia</button>
-      </div>
-    </div>
-  `;
-  resultDiv.style.display = 'block';
-}
-
-function getModMsg() {
-  return localStorage.getItem('imusa_mod_msg') || 'Grazie per la tua storia. I-Musa la sta esaminando... I contenuti creati verranno esaminati prima di essere pubblicati. Riceverai una notifica quando il tuo racconto sarà approvato.';
-}
-
-
-
-function getImusaGHConfig() {
-  try { return JSON.parse(localStorage.getItem('imusa_gh_config') || 'null'); }
-  catch(e) { return null; }
-}
-function setImusaGHConfig(c) { localStorage.setItem('imusa_gh_config', JSON.stringify(c)); }
-
-// Override: use imusa_gh_config (shared with admin)
-function getGHConfig() { return getImusaGHConfig(); }
-
 // ═══════════════════════════════════════
 //  LOAD BOOKS FROM GITHUB
 // ═══════════════════════════════════════
-// URL fisso del JSON pubblico — non dipende dalla config localStorage
 const BOOKS_JSON_URL = 'https://raw.githubusercontent.com/fabioscrive/imusa/main/books.json';
 
 async function loadBooksFromGithub() {
