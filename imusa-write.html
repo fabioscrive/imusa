@@ -337,6 +337,7 @@
       <li><a onclick="showPage('terminal')" id="nav-terminal" class="active">Terminale</a></li>
       <li><a onclick="showPage('write')" id="nav-write">Scrivi</a></li>
       <li><a onclick="showPage('library')" id="nav-library">Libri</a></li>
+      <li><a href="admin.html" style="color:var(--amber-dark);">⚙ Configura</a></li>
     </ul>
   </nav>
 
@@ -638,12 +639,16 @@ async function scanDirectory() {
 // ═══════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════
-function showPage(id) {
+async function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   document.getElementById('nav-' + id)?.classList.add('active');
-  if (id === 'library') { renderLibrary(); if (dirHandle) scanDirectory(); }
+  if (id === 'library') {
+    await loadBooksFromGithub();
+    renderLibrary();
+    if (dirHandle) scanDirectory();
+  }
   if (id === 'config') loadGHConfigForm();
   window.scrollTo(0, 0);
 }
@@ -851,7 +856,7 @@ async function saveStory() {
 
     // 3. Auto-sync to GitHub (silently, if configured)
     try {
-      await syncImusaStoriesToGithub();
+      await syncBooksToGithub();
       showToast('Sincronizzato su GitHub ✓', 'success');
     } catch(ghErr) {
       console.warn('GitHub sync fallito:', ghErr);
@@ -1203,49 +1208,33 @@ function setImusaGHConfig(c) { localStorage.setItem('imusa_gh_config', JSON.stri
 // Override: use imusa_gh_config (shared with admin)
 function getGHConfig() { return getImusaGHConfig(); }
 
-async function syncImusaStoriesToGithub() {
-  const gh = getImusaGHConfig();
-  if (!gh) throw new Error('Configurazione GitHub mancante');
-  const stories = getImusaStories();
-  const data = { stories: stories, lastUpdated: new Date().toISOString() };
-  const jsonString = JSON.stringify(data, null, 2);
-  const encoded = btoa(unescape(encodeURIComponent(jsonString)));
-  const url = `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/books.json`;
-  const headers = {
-    'Authorization': `token ${gh.token}`,
-    'Content-Type': 'application/json',
-    'Accept': 'application/vnd.github.v3+json'
-  };
-  let sha = '';
+// ═══════════════════════════════════════
+//  LOAD BOOKS FROM GITHUB
+// ═══════════════════════════════════════
+async function loadBooksFromGithub() {
+  const gh = getGHConfig();
+  if (!gh) return;
   try {
-    const res = await fetch(url + `?ref=${gh.branch}&t=${Date.now()}`, { headers });
-    if (res.ok) { const d = await res.json(); sha = d.sha || ''; }
-  } catch(e) {}
-  const body = { message: 'Aggiornamento storie I-Musa', content: encoded, branch: gh.branch };
-  if (sha) body.sha = sha;
-  const putRes = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
-  if (!putRes.ok) {
-    const err = await putRes.json();
-    throw new Error(err.message || `HTTP ${putRes.status}`);
-  }
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/books.json?t=${Date.now()}`
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.books && data.books.length > 0) {
+        // GitHub è la fonte di verità: merge mantenendo eventuali libri locali non ancora sincronizzati
+        const local = getBooks();
+        const merged = [
+          ...data.books,
+          ...local.filter(l => !data.books.find(r => r.id === l.id))
+        ];
+        setBooks(merged);
+      }
+    }
+  } catch(e) { /* silent fail */ }
 }
 
 (async function init() {
-  const gh = getGHConfig();
-  if (gh) {
-    try {
-      const res = await fetch(`https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/books.json?t=${Date.now()}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.books && data.books.length > 0) {
-          // Merge with local
-          const local = getBooks();
-          const merged = [...data.books, ...local.filter(l => !data.books.find(r => r.id === l.id))];
-          setBooks(merged);
-        }
-      }
-    } catch(e) { /* silent fail */ }
-  }
+  await loadBooksFromGithub();
 })();
 </script>
 
