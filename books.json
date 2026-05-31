@@ -1,6 +1,16 @@
 {
   "books": [
     {
+      "id": "book-1780264861924",
+      "title": "Un vecchio amico",
+      "author": "Fabio",
+      "prompt": "Un vecchio amico mi viene a trovare parliamo due ore poi ci accorgiamo che nessuno dei due esiste. Ridendo spariamo nel nulla.",
+      "text": "Un vecchio amico\n\nLa porta si apre e Marco entra. Lo riconosco, ma qualcosa è diverso.  \nCi sediamo e parliamo di vecchi tempi, dei nostri lavori, delle nostre case.  \nIl tempo passa. L'orologio sul muro segna due ore, ma non sento il tic-tac, nient'altro.\n\nMentre ridiamo, noto che lui non è più chi era. La sua faccia è sfocata.  \n\"Chi sei?\" chiedo. Marco ride e dice: \"Sono tu stesso\". Io mi guardo allo specchio e non mi riconosco.  \nCi rendiamo conto: noi due non esistiamo. Non c'è nessuno di noi.\n\nRidiamo ancora, ma questa volta siamo solo numeri e suoni. Il nostro parlare diventa un'eco vuota.  \nSpariamo la voce, non verso una persona, ma verso il nulla.  \n\nSpariamo nel vuoto.  \nFine.",
+      "coverUrl": "https://raw.githubusercontent.com/fabioscrive/imusa/main/cover.jpg",
+      "date": "2026-05-31T22:01:01.924Z",
+      "txtFilename": "book_1780264886939_Un_vecchio_amico.txt"
+    },
+    {
       "id": "book-1780260051521",
       "title": "L'ultimo scrittore sulla terra",
       "author": "Utente PC",
@@ -11,5 +21,5 @@
       "txtFilename": "book_0_Lultimo_scrittore_su.txt"
     }
   ],
-  "lastUpdated": "2026-05-31T21:36:22.765Z"
+  "lastUpdated": "2026-05-31T22:01:26.940Z"
 }
