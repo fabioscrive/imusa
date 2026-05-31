@@ -505,11 +505,10 @@ let currentCoverUrl = '';
 let dirHandle = null;      // FileSystemDirectoryHandle (File System Access API)
 let scannedBooks = [];     // books found in directory
 
-function getBooks() {
-  try { return JSON.parse(localStorage.getItem('imusa_books') || '[]'); }
-  catch(e) { return []; }
-}
-function setBooks(d) { localStorage.setItem('imusa_books', JSON.stringify(d)); }
+// In-memory cache — unica fonte di verità (caricata da GitHub)
+let _booksCache = [];
+function getBooks() { return _booksCache; }
+function setBooks(d) { _booksCache = d || []; }
 function getGHConfig() {
   try { return JSON.parse(localStorage.getItem('imusa_gh_config') || 'null'); }
   catch(e) { return null; }
@@ -528,21 +527,13 @@ async function buildBookFilename(title) {
       const m = name.match(/^book_(\d+)_/);
       if (m) maxN = Math.max(maxN, parseInt(m[1], 10));
     }
-  } else {
-    // Fallback: check localStorage index
-    const idx = JSON.parse(localStorage.getItem('imusa_book_index') || '[]');
-    idx.forEach(n => { const m = n.match(/^book_(\d+)_/); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
   }
   const n = maxN + 1;
   const slug = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim().slice(0, 20).replace(/\s+/g, '_');
   return `book_${n}_${slug}.txt`;
 }
 
-/** Add filename to localStorage index (for fallback counting) */
-function addToLocalIndex(filename) {
-  const idx = JSON.parse(localStorage.getItem('imusa_book_index') || '[]');
-  if (!idx.includes(filename)) { idx.push(filename); localStorage.setItem('imusa_book_index', JSON.stringify(idx)); }
-}
+function addToLocalIndex(filename) { /* no-op: index no longer stored locally */ }
 
 /** Build TXT content for a story */
 function buildTxtContent(story) {
@@ -848,7 +839,7 @@ async function saveStory() {
     const txtFilename = await saveStoryAsTxt(currentStory);
     currentStory.txtFilename = txtFilename;
 
-    // 2. Save to localStorage books
+    // 2. Aggiunge al cache in memoria
     const books = getBooks();
     if (!books.find(b => b.id === currentStory.id)) {
       books.unshift(currentStory);
@@ -1185,11 +1176,7 @@ function getModMsg() {
   return localStorage.getItem('imusa_mod_msg') || 'Grazie per la tua storia. I-Musa la sta esaminando... I contenuti creati verranno esaminati prima di essere pubblicati. Riceverai una notifica quando il tuo racconto sarà approvato.';
 }
 
-function getImusaStories() {
-  try { return JSON.parse(localStorage.getItem('imusa_stories') || '[]'); }
-  catch(e) { return []; }
-}
-function setImusaStories(d) { localStorage.setItem('imusa_stories', JSON.stringify(d)); }
+
 
 function getImusaGHConfig() {
   try { return JSON.parse(localStorage.getItem('imusa_gh_config') || 'null'); }
@@ -1211,15 +1198,7 @@ async function loadBooksFromGithub() {
     const res = await fetch(BOOKS_JSON_URL + '?t=' + Date.now());
     if (res.ok) {
       const data = await res.json();
-      if (data.books && data.books.length > 0) {
-        // GitHub è la fonte di verità: merge con eventuali libri locali non ancora sincronizzati
-        const local = getBooks();
-        const merged = [
-          ...data.books,
-          ...local.filter(l => !data.books.find(r => r.id === l.id))
-        ];
-        setBooks(merged);
-      }
+      setBooks(data.books || []);
     }
   } catch(e) { /* silent fail */ }
 }

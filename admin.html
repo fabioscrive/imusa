@@ -477,10 +477,10 @@ document.addEventListener('keydown', e => {
 // ═══════════════════════════════════════
 //  DATA HELPERS
 // ═══════════════════════════════════════
-function getBooks() {
-  try { return JSON.parse(localStorage.getItem('imusa_books') || '[]'); } catch(e) { return []; }
-}
-function setBooks(d) { localStorage.setItem('imusa_books', JSON.stringify(d)); }
+// In-memory cache — unica fonte di verità (caricata da GitHub)
+let _booksCache = [];
+function getBooks() { return _booksCache; }
+function setBooks(d) { _booksCache = d || []; }
 function getGHConfig() {
   try { return JSON.parse(localStorage.getItem('imusa_gh_config') || 'null'); } catch(e) { return null; }
 }
@@ -496,13 +496,19 @@ function setModMsg(m) { localStorage.setItem('imusa_mod_msg', m); }
 const BOOKS_JSON_URL = 'https://raw.githubusercontent.com/fabioscrive/imusa/main/books.json';
 
 async function loadBooksFromGithub() {
+  const wrap = document.getElementById('books-table-wrap');
+  const count = document.getElementById('books-count');
+  if (wrap) wrap.innerHTML = '<div class="empty-books" style="color:var(--amber);">⟳ Caricamento da GitHub...</div>';
+  if (count) count.textContent = '...';
   try {
     const res = await fetch(BOOKS_JSON_URL + '?t=' + Date.now());
-    if (res.ok) {
-      const data = await res.json();
-      if (data.books) setBooks(data.books);
-    }
-  } catch(e) { console.warn('GitHub load error:', e); }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    setBooks(data.books || []);
+  } catch(e) {
+    console.warn('GitHub load error:', e);
+    if (wrap) wrap.innerHTML = '<div class="empty-books" style="color:var(--danger);">✗ Errore caricamento da GitHub: ' + e.message + '</div>';
+  }
 }
 
 // ═══════════════════════════════════════
@@ -682,7 +688,7 @@ let pendingDeleteId = null;
 
 function confirmDelete(id, title) {
   pendingDeleteId = id;
-  document.getElementById('confirm-msg').textContent = `Vuoi eliminare "${title}"? L'operazione rimuoverà il romanzo da localStorage. Non è reversibile.`;
+  document.getElementById('confirm-msg').textContent = `Vuoi eliminare "${title}"? L'operazione rimuoverà il romanzo da GitHub. Non è reversibile.`;
   document.getElementById('confirm-modal').classList.add('open');
   document.getElementById('confirm-ok-btn').onclick = () => doDelete(id);
 }
