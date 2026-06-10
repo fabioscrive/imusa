@@ -702,134 +702,34 @@ async function generateStoryText(title, prompt) {
   const systemPrompt = `Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto completo di massimo 500 parole basato sulla trama fornita. Usa un linguaggio semplice e diretto, frasi brevi. Racconta solo la storia, senza introduzioni né commenti. Dividi il testo in paragrafi.`;
   const userPrompt = `Titolo: "${title}". Trama: ${prompt}.`;
 
-  // ══ PROVIDER 1: mlvoca.github.io (free-llm-api) — NO KEY, NO CORS, truly free ══
-  try {
-    statusIfLoading('Connessione a mlvoca (tinyllama)...');
-    const res = await fetch('https://mlvoca.github.io/free-llm-api/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'tinyllama',
-        prompt: systemPrompt + '\n\n' + userPrompt,
-        stream: false
-      })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const text = data.response || data.text || data.content || data.message?.content;
-      if (text && text.length > 100) return text;
-    }
-    console.warn('mlvoca failed:', res.status);
-  } catch(e) { console.warn('mlvoca error:', e.message); }
+  statusIfLoading('Connessione alla rete neurale...');
 
-  // ══ PROVIDER 2: Cloudflare Workers AI (free, no key for demo) ══
-  try {
-    statusIfLoading('Connessione a Cloudflare Workers AI...');
-    // Using a public demo account endpoint that works without auth
-    const res = await fetch('https://api.cloudflare.com/client/v4/accounts/6f8b1234a1b2c3d4e5f6a7b8c9d0e1f2/ai/run/@cf/meta/llama-3.1-8b-instruct', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ]
-      })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const text = data.result?.response || data.result?.content;
-      if (text && text.length > 100) return text;
-    }
-    console.warn('Cloudflare failed:', res.status);
-  } catch(e) { console.warn('Cloudflare error:', e.message); }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [
+        { role: 'user', content: userPrompt }
+      ]
+    })
+  });
 
-  // ══ PROVIDER 3: Hugging Face Inference API (free, no key for public models) ══
-  try {
-    statusIfLoading('Connessione a Hugging Face...');
-    const res = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        inputs: `<s>[INST] ${systemPrompt}\n\n${userPrompt} [/INST]`,
-        parameters: { max_new_tokens: 800, temperature: 0.7 }
-      })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const text = Array.isArray(data) ? data[0]?.generated_text : data.generated_text;
-      if (text && text.length > 100) {
-        // Clean up the prompt from the response
-        const cleanText = text.replace(/<s>\[INST\].*?\[\/INST\]/s, '').trim();
-        if (cleanText.length > 100) return cleanText;
-        return text;
-      }
-    }
-    console.warn('HuggingFace failed:', res.status);
-  } catch(e) { console.warn('HuggingFace error:', e.message); }
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Errore API: ' + res.status + ' — ' + err);
+  }
 
-  // ══ PROVIDER 4: Pollinations text (GET, no key) ══
-  try {
-    statusIfLoading('Connessione a text.pollinations.ai...');
-    const fullPrompt = encodeURIComponent(systemPrompt + '\n\n' + userPrompt);
-    const res = await fetch(`https://text.pollinations.ai/${fullPrompt}?model=openai&seed=${Math.floor(Math.random()*999999999)}&temperature=0.7`, {
-      method: 'GET',
-      headers: { 'Accept': 'text/plain' }
-    });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 200) return text;
-    }
-    console.warn('Pollinations GET failed:', res.status);
-  } catch(e) { console.warn('Pollinations GET error:', e.message); }
-
-  // ══ PROVIDER 5: Pollinations text (POST) ══
-  try {
-    statusIfLoading('Tentativo POST su text.pollinations.ai...');
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'openai',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        seed: Math.floor(Math.random() * 999999999),
-        temperature: 0.7
-      })
-    });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 200) return text;
-    }
-    console.warn('Pollinations POST failed:', res.status);
-  } catch(e) { console.warn('Pollinations POST error:', e.message); }
-
-  // ══ PROVIDER 6: Pollinations /openai endpoint ══
-  try {
-    statusIfLoading('Tentativo endpoint /openai...');
-    const res = await fetch('https://text.pollinations.ai/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'openai',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        seed: Math.floor(Math.random() * 999999999)
-      })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content;
-      if (text && text.length > 200) return text;
-    }
-    console.warn('Pollinations /openai failed:', res.status);
-  } catch(e) { console.warn('Pollinations /openai error:', e.message); }
-
-  throw new Error('Tutti i provider AI sono irraggiungibili. Riprova più tardi.');
+  const data = await res.json();
+  const text = data.content?.[0]?.text;
+  if (!text || text.length < 50) throw new Error('Risposta vuota dal modello.');
+  return text;
 }
 
 function statusIfLoading(msg) {
