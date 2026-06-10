@@ -651,10 +651,8 @@ async function generateStory() {
     const storyText = await generateStoryText(title, prompt);
 
     // Usa cover.jpg dal repository GitHub configurato
-    const gh = getGHConfig();
-    const coverUrl = gh
-      ? `https://raw.githubusercontent.com/${gh.owner}/${gh.repo}/${gh.branch}/cover.jpg`
-      : '';
+    // Generate AI cover image
+    const coverUrl = await generateCover(title, prompt);
     currentCoverUrl = coverUrl;
 
     // Store current story
@@ -697,18 +695,13 @@ async function generateStory() {
 
 // ══ Generate story text using free AI APIs ══
 async function generateStoryText(title, prompt) {
-  const fullPrompt = encodeURIComponent(
-    `Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto di massimo 400 parole basato sulla trama fornita. ` +
-    `Usa un linguaggio semplice e diretto, frasi brevi, niente parole ricercate o metafore elaborate. ` +
-    `Racconta solo la storia, senza introduzioni né commenti. ` +
-    `Il titolo è: "${title}". Trama: ${prompt}.`
-  );
+  const systemPrompt = `Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto di massimo 400 parole basato sulla trama fornita. Usa un linguaggio semplice e diretto, frasi brevi, niente parole ricercate o metafore elaborate. Racconta solo la storia, senza introduzioni né commenti.`;
+  const userPrompt = `Il titolo è: "${title}". Trama: ${prompt}.`;
 
-  // ══ POLLINATIONS.AI FREE TEXT API (no key needed) ══
-  // Endpoint legacy confermato: text.pollinations.ai (GET, gratuito)
+  // ══ POLLINATIONS.AI NEW API (gen.pollinations.ai) ══
   try {
     const seed = Math.floor(Math.random() * 999999999);
-    const res = await fetch(`https://text.pollinations.ai/${fullPrompt}?model=openai&seed=${seed}`, {
+    const res = await fetch(`https://gen.pollinations.ai/text/${encodeURIComponent(userPrompt)}?model=openai&seed=${seed}&system=${encodeURIComponent(systemPrompt)}`, {
       method: 'GET',
       headers: { 'Accept': 'text/plain' }
     });
@@ -716,24 +709,28 @@ async function generateStoryText(title, prompt) {
       const text = await res.text();
       if (text && text.length > 200) return text;
     }
-  } catch(e) { console.warn('Pollinations text GET failed:', e); }
+  } catch(e) { console.warn('Pollinations GET failed:', e); }
 
-  // Fallback POST
+  // Fallback POST to new OpenAI-compatible endpoint
   try {
-    const res = await fetch('https://text.pollinations.ai/', {
+    const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'openai',
-        messages: [{ role: 'user', content: decodeURIComponent(fullPrompt) }],
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
         seed: Math.floor(Math.random() * 999999999)
       })
     });
     if (res.ok) {
-      const text = await res.text();
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || data.text;
       if (text && text.length > 200) return text;
     }
-  } catch(e) { console.warn('Pollinations text POST failed:', e); }
+  } catch(e) { console.warn('Pollinations POST failed:', e); }
 
   throw new Error('I-Musa non riesce a connettersi. Riprova tra qualche istante.');
 }
