@@ -190,6 +190,31 @@
   .btn-crowd { display:inline-block;background:var(--amber);color:var(--black);font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;padding:1.15rem 3.2rem;text-decoration:none;font-weight:500;transition:all .3s; }
   .btn-crowd:hover { background:var(--off-white);transform:translateY(-2px); }
 
+  /* BOOKABOOK BADGE */
+  .bookabook-badge {
+    display:flex;flex-direction:column;align-items:center;gap:.8rem;
+    margin:2.5rem auto 2.8rem;
+    padding:1.8rem 2.5rem;
+    border:1px solid rgba(212,168,67,.2);
+    background:rgba(212,168,67,.04);
+    max-width:380px;
+  }
+  .bookabook-label {
+    font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.3em;
+    color:var(--muted);text-transform:uppercase;
+  }
+  .bookabook-link { display:inline-block;transition:opacity .3s; }
+  .bookabook-link:hover { opacity:.75; }
+  .bookabook-logo {
+    height:72px;width:auto;display:block;
+    filter: invert(1) sepia(1) saturate(2) hue-rotate(5deg) brightness(1.1);
+  }
+  .bookabook-sub {
+    font-family:'DM Serif Display',serif;font-style:italic;
+    font-size:.88rem;color:rgba(240,237,230,.5);
+    max-width:260px;line-height:1.6;
+  }
+
   /* AUTORE */
   .autore-section { padding:8rem 6rem;border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:5rem;align-items:center; }
   .autore-photo { width:110px;height:110px;border:1px solid var(--amber);flex-shrink:0;overflow:hidden; }
@@ -399,6 +424,17 @@
       </div>
     </div>
     <p class="crowd-desc">Con 100 preordini, <em>I-Musa</em> arriva in tutte le librerie d'Italia e negli store online di tutto il mondo. Sii tra i primi a tenerlo in mano.</p>
+
+    <!-- Bookabook section -->
+    <div class="bookabook-badge">
+      <div class="bookabook-label">In crowdfunding su</div>
+      <a href="https://bookabook.it" target="_blank" rel="noopener" class="bookabook-link">
+        <img src="data:image/jpeg;base64,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" 
+             alt="Bookabook" class="bookabook-logo">
+      </a>
+      <div class="bookabook-sub">Sostieni il progetto e aiuta il libro a nascere</div>
+    </div>
+
     <a href="#" class="btn-crowd" onclick="alert('Link crowdfunding in arrivo! Torna presto.'); return false;">Preordina I-Musa →</a>
   </div>
 </section>
