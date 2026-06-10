@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I-Musa — CRT Terminal</title>
+<title>Scrivi con I-Musa — By Merchant Solutions</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
@@ -273,16 +273,9 @@
     transition: width 0.3s;
   }
 
-  .screen-content::-webkit-scrollbar {
-    width: 8px;
-  }
-  .screen-content::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .screen-content::-webkit-scrollbar-thumb {
-    background: var(--amber-dim);
-    border-radius: 4px;
-  }
+  .screen-content::-webkit-scrollbar { width: 8px; }
+  .screen-content::-webkit-scrollbar-track { background: transparent; }
+  .screen-content::-webkit-scrollbar-thumb { background: var(--amber-dim); border-radius: 4px; }
 
   .word-counter {
     font-size: 1.1rem;
@@ -314,11 +307,7 @@
   .library-icon:hover .folder-label {
     text-shadow: 0 0 8px var(--amber), 0 0 16px var(--amber-glow);
   }
-  .folder-pixel {
-    width: 48px;
-    height: 40px;
-    image-rendering: pixelated;
-  }
+  .folder-pixel { width: 48px; height: 40px; image-rendering: pixelated; }
   .folder-label {
     font-family: 'VT323', monospace;
     font-size: 0.9rem;
@@ -346,27 +335,10 @@
     box-shadow: 0 0 15px var(--amber-glow);
     background: rgba(255,176,0,0.08);
   }
-  .library-book-title {
-    font-size: 1.3rem;
-    text-shadow: 0 0 4px var(--amber);
-    margin-bottom: 0.3rem;
-    line-height: 1.2;
-  }
-  .library-book-author {
-    font-size: 1rem;
-    color: var(--amber-dim);
-  }
-  .library-book-date {
-    font-size: 0.9rem;
-    color: var(--amber-dim);
-    margin-top: 0.5rem;
-  }
-  .library-empty {
-    text-align: center;
-    padding: 3rem;
-    color: var(--amber-dim);
-    font-size: 1.3rem;
-  }
+  .library-book-title { font-size: 1.3rem; text-shadow: 0 0 4px var(--amber); margin-bottom: 0.3rem; line-height: 1.2; }
+  .library-book-author { font-size: 1rem; color: var(--amber-dim); }
+  .library-book-date { font-size: 0.9rem; color: var(--amber-dim); margin-top: 0.5rem; }
+  .library-empty { text-align: center; padding: 3rem; color: var(--amber-dim); font-size: 1.3rem; }
 
   .reader-header {
     display: flex;
@@ -376,11 +348,7 @@
     flex-wrap: wrap;
     gap: 1rem;
   }
-  .reader-meta {
-    color: var(--amber-dim);
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-  }
+  .reader-meta { color: var(--amber-dim); font-size: 1.1rem; margin-bottom: 1rem; }
 
   @media (max-width: 768px) {
     .crt-monitor { width: 98vw; height: 95vh; padding: 12px; }
@@ -397,7 +365,7 @@
 <body>
 
 <div class="crt-monitor">
-  <div class="crt-brand">I-Musa Terminal v2.0</div>
+  <div class="crt-brand">I-Musa Terminal v2.1</div>
   <div class="crt-screen">
     <div class="crt-vignette"></div>
 
@@ -423,7 +391,7 @@
 
     <div class="screen-content" id="screen">
 
-      <!-- === SCREEN 1: INTRO === -->
+      <!-- SCREEN 1: INTRO -->
       <div class="screen-section active" id="screen-intro">
         <div style="margin-bottom: 2rem;">
           <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
@@ -431,15 +399,11 @@
         <div style="margin-bottom: 1.5rem;">
           Benvenuto. Sono <span style="text-shadow: 0 0 8px var(--amber);">I-Musa</span>.
         </div>
-        <div style="margin-bottom: 1.5rem;">
-          Vuoi scrivere, o parlare?
-        </div>
+        <div style="margin-bottom: 1.5rem;">Vuoi scrivere, o parlare?</div>
         <div style="margin-bottom: 2rem;">
           <span style="color: var(--amber-dim);">───────────────────────────────────────</span>
         </div>
-        <div>
-          <span style="color: var(--amber-dim);">>></span> Come ti chiami?
-        </div>
+        <div><span style="color: var(--amber-dim);">>></span> Come ti chiami?</div>
         <div style="margin-top: 1rem;">
           <span style="color: var(--amber-dim);">></span>
           <input type="text" class="crt-input" id="input-name" placeholder="Scrivi il tuo nome..." maxlength="40" autocomplete="off">
@@ -447,12 +411,12 @@
         </div>
       </div>
 
-      <!-- === SCREEN 2: GREETING === -->
+      <!-- SCREEN 2: GREETING -->
       <div class="screen-section" id="screen-greet">
         <div id="greet-content"></div>
       </div>
 
-      <!-- === SCREEN 3: FORM === -->
+      <!-- SCREEN 3: FORM -->
       <div class="screen-section" id="screen-form">
         <div style="margin-bottom: 1.5rem;">
           <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
@@ -478,11 +442,9 @@
         </div>
       </div>
 
-      <!-- === SCREEN 4: LOADING === -->
+      <!-- SCREEN 4: LOADING -->
       <div class="screen-section" id="screen-loading">
-        <div style="margin-bottom: 2rem;">
-          I-Musa sta scrivendo...
-        </div>
+        <div style="margin-bottom: 2rem;">I-Musa sta scrivendo...</div>
         <div class="loading-bar">
           <div class="loading-bar-fill" id="loading-fill"></div>
         </div>
@@ -491,7 +453,7 @@
         </div>
       </div>
 
-      <!-- === SCREEN 5: RESULT === -->
+      <!-- SCREEN 5: RESULT -->
       <div class="screen-section" id="screen-result">
         <div style="margin-bottom: 1.5rem;">
           <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
@@ -507,33 +469,25 @@
           <span style="color: var(--amber-dim);">───────────────────────────────────────</span>
         </div>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <button class="crt-btn" onclick="saveAndDownload()">
-            ⬇ SCARICA .TXT
-          </button>
-          <button class="crt-btn" onclick="newStory()">
-            ↻ NUOVA STORIA
-          </button>
+          <button class="crt-btn" onclick="saveAndDownload()">⬇ SCARICA .TXT</button>
+          <button class="crt-btn" onclick="newStory()">↻ NUOVA STORIA</button>
         </div>
       </div>
 
-      <!-- === SCREEN 6: LIBRARY === -->
+      <!-- SCREEN 6: LIBRARY -->
       <div class="screen-section" id="screen-library">
         <div style="margin-bottom: 1.5rem;">
           <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
         </div>
-        <div style="margin-bottom: 0.5rem; font-size: 1.8rem; text-shadow: 0 0 8px var(--amber);">
-          LIBRERIA
-        </div>
-        <div style="margin-bottom: 2rem; color: var(--amber-dim); font-size: 1.1rem;">
-          I tuoi racconti salvati in locale
-        </div>
+        <div style="margin-bottom: 0.5rem; font-size: 1.8rem; text-shadow: 0 0 8px var(--amber);">LIBRERIA</div>
+        <div style="margin-bottom: 2rem; color: var(--amber-dim); font-size: 1.1rem;">I tuoi racconti salvati in locale</div>
         <div id="library-content"></div>
         <div style="margin-top: 2rem;">
           <button class="crt-btn" onclick="backToIntro()">← INDIETRO</button>
         </div>
       </div>
 
-      <!-- === SCREEN 7: READER === -->
+      <!-- SCREEN 7: READER -->
       <div class="screen-section" id="screen-reader">
         <div class="reader-header">
           <div>
@@ -583,15 +537,11 @@ function typeText(element, text, speed = 30) {
     const interval = setInterval(() => {
       element.textContent += text.charAt(i);
       i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        resolve();
-      }
+      if (i >= text.length) { clearInterval(interval); resolve(); }
     }, speed);
   });
 }
 
-// ── INTRO: NAME ──
 document.getElementById('input-name').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     const name = this.value.trim();
@@ -600,18 +550,12 @@ document.getElementById('input-name').addEventListener('keydown', function(e) {
     showScreen('greet');
     const greetDiv = document.getElementById('greet-content');
     greetDiv.innerHTML = `
-      <div style="margin-bottom: 1.5rem;">
-        <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
-      </div>
+      <div style="margin-bottom: 1.5rem;"><span style="color: var(--amber-dim);">═══════════════════════════════════════</span></div>
       <div style="margin-bottom: 1.5rem;" id="line1"></div>
       <div style="margin-bottom: 1.5rem;" id="line2"></div>
       <div style="margin-bottom: 2rem;" id="line3"></div>
-      <div style="margin-bottom: 1rem;">
-        <span style="color: var(--amber-dim);">>></span> Pronto per iniziare?
-      </div>
-      <div style="margin-top: 1rem;">
-        <button class="crt-btn" onclick="showScreen('form')">INIZIA A SCRIVERE →</button>
-      </div>
+      <div style="margin-bottom: 1rem;"><span style="color: var(--amber-dim);">>></span> Pronto per iniziare?</div>
+      <div style="margin-top: 1rem;"><button class="crt-btn" onclick="showScreen('form')">INIZIA A SCRIVERE →</button></div>
     `;
     setTimeout(async () => {
       await typeText(document.getElementById('line1'), 'Piacere di conoscerti, ' + name + '.');
@@ -621,7 +565,6 @@ document.getElementById('input-name').addEventListener('keydown', function(e) {
   }
 });
 
-// ── WORD COUNTER ──
 function updateWordCounter() {
   const text = document.getElementById('input-prompt').value;
   const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
@@ -630,10 +573,6 @@ function updateWordCounter() {
   el.className = 'word-counter ' + (words > 200 ? 'warning' : '');
 }
 
-// ═══════════════════════════════════════
-//  AI GENERATION — MULTI-PROVIDER FALLBACK
-//  No API keys required. Free tiers only.
-// ═══════════════════════════════════════
 async function generateStory() {
   const title = document.getElementById('input-title').value.trim();
   const prompt = document.getElementById('input-prompt').value.trim();
@@ -686,9 +625,7 @@ async function generateStory() {
     document.getElementById('res-date').textContent = currentStory.date;
     document.getElementById('res-text').textContent = storyText;
 
-    setTimeout(() => {
-      showScreen('result');
-    }, 500);
+    setTimeout(() => { showScreen('result'); }, 500);
 
   } catch(e) {
     clearInterval(progressInterval);
@@ -704,6 +641,7 @@ async function generateStoryText(title, prompt) {
 
   statusIfLoading('Connessione alla rete neurale...');
 
+  // FIX: removed x-api-key header — authentication is handled by the Claude artifact proxy
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -715,9 +653,7 @@ async function generateStoryText(title, prompt) {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
       system: systemPrompt,
-      messages: [
-        { role: 'user', content: userPrompt }
-      ]
+      messages: [{ role: 'user', content: userPrompt }]
     })
   });
 
@@ -739,7 +675,6 @@ function statusIfLoading(msg) {
   }
 }
 
-// ── DOWNLOAD ──
 function saveAndDownload() {
   if (!currentStory) return;
   downloadStory(currentStory);
@@ -763,7 +698,6 @@ function downloadStory(story) {
   const content = lines.join('\n');
   const slug = story.title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim().slice(0, 20).replace(/\s+/g, '_');
   const filename = 'imusa_' + slug + '.txt';
-
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -780,9 +714,6 @@ function newStory() {
   showScreen('form');
 }
 
-// ═══════════════════════════════════════
-//  LIBRARY
-// ═══════════════════════════════════════
 function goToLibrary() {
   previousScreen = document.querySelector('.screen-section.active')?.id.replace('screen-', '') || 'intro';
   renderLibrary();
@@ -830,12 +761,10 @@ function readBook(id) {
   const book = books.find(b => b.id === id);
   if (!book) return;
   currentReaderBook = book;
-
   const date = new Date(book.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
   document.getElementById('reader-title').textContent = book.title;
   document.getElementById('reader-meta').textContent = book.author + ' e I-Musa  ·  ' + date;
   document.getElementById('reader-text').textContent = book.text;
-
   showScreen('reader');
 }
 
@@ -848,7 +777,6 @@ function esc(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── FOCUS ──
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('input-name').focus();
 });
