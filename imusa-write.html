@@ -438,10 +438,7 @@
         <p style="color:var(--muted);font-size:.95rem;margin-top:.5rem;">Tutte le storie create con I-Musa.</p>
       </div>
 
-      <!-- Refresh from GitHub -->
-      <div style="margin-bottom:2rem; text-align:right;">
-        <button class="btn btn-outline" style="padding:.5rem 1.2rem;" onclick="refreshLibrary()">🔄 Aggiorna da GitHub</button>
-      </div>
+      <!-- Library is local only -->
 
       <div class="bookshelf" id="bookshelf"></div>
       <div id="empty-library" style="text-align:center; padding:4rem 2rem; display:none;">
@@ -506,6 +503,19 @@ function getGHConfig() {
 }
 function setGHConfig(c) { localStorage.setItem('imusa_gh_config', JSON.stringify(c)); }
 
+function saveBooksToLocalStorage() {
+  localStorage.setItem('imusa_books', JSON.stringify(_booksCache));
+}
+
+function loadBooksFromLocalStorage() {
+  try {
+    const stored = localStorage.getItem('imusa_books');
+    if (stored) {
+      _booksCache = JSON.parse(stored);
+    }
+  } catch(e) { console.warn('Errore caricamento libri locali:', e); }
+}
+
 // ═══════════════════════════════════════
 //  TXT HELPERS
 // ═══════════════════════════════════════
@@ -555,7 +565,7 @@ async function showPage(id) {
   document.getElementById('page-' + id).classList.add('active');
   document.getElementById('nav-' + id)?.classList.add('active');
   if (id === 'library') {
-    await loadBooksFromGithub();
+    loadBooksFromLocalStorage();
     renderLibrary();
   }
   if (id === 'config') loadGHConfigForm();
@@ -563,9 +573,9 @@ async function showPage(id) {
 }
 
 async function refreshLibrary() {
-  await loadBooksFromGithub();
+  loadBooksFromLocalStorage();
   renderLibrary();
-  showToast('Libreria aggiornata da GitHub', 'success');
+  showToast('Libreria aggiornata', 'success');
 }
 
 // ═══════════════════════════════════════
@@ -759,27 +769,20 @@ async function saveStory() {
   if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio...'; }
 
   try {
-    // 1. Download TXT file
+    // 1. Download TXT file to user's PC
     const txtFilename = saveStoryAsTxt(currentStory);
     currentStory.txtFilename = txtFilename;
 
-    // 2. Aggiungi al cache in memoria
+    // 2. Save to localStorage for library view
     const books = getBooks();
     if (!books.find(b => b.id === currentStory.id)) {
       books.unshift(currentStory);
       setBooks(books);
     }
+    saveBooksToLocalStorage();
 
     if (btn) { btn.textContent = '✓ Pubblicato'; }
-
-    // 3. Sync to GitHub
-    try {
-      await syncBooksToGithub();
-      showToast('Sincronizzato su GitHub ✓', 'success');
-    } catch(ghErr) {
-      console.warn('GitHub sync fallito:', ghErr);
-      showToast('Salvato localmente. Sync GitHub: ' + ghErr.message, 'error');
-    }
+    showToast('Libro salvato in locale e scaricato ✓', 'success');
   } catch(e) {
     showToast('Errore: ' + e.message, 'error');
     if (btn) { btn.disabled = false; btn.textContent = '✦ Pubblica'; }
@@ -926,38 +929,7 @@ function loadGHConfigForm() {
   }
 }
 
-async function syncBooksToGithub() {
-  const gh = getGHConfig();
-  if (!gh) throw new Error('Configurazione GitHub mancante');
-
-  const books = getBooks();
-  const data = { books: books, lastUpdated: new Date().toISOString() };
-  const jsonString = JSON.stringify(data, null, 2);
-  const encoded = btoa(unescape(encodeURIComponent(jsonString)));
-
-  const url = `https://api.github.com/repos/${gh.owner}/${gh.repo}/contents/books.json`;
-  const headers = {
-    'Authorization': `token ${gh.token}`,
-    'Content-Type': 'application/json',
-    'Accept': 'application/vnd.github.v3+json'
-  };
-
-  // Get current SHA
-  let sha = '';
-  try {
-    const res = await fetch(url + `?ref=${gh.branch}&t=${Date.now()}`, { headers });
-    if (res.ok) { const d = await res.json(); sha = d.sha || ''; }
-  } catch(e) { /* file doesn't exist yet */ }
-
-  const body = { message: 'Aggiornamento libreria I-Musa', content: encoded, branch: gh.branch };
-  if (sha) body.sha = sha;
-
-  const putRes = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
-  if (!putRes.ok) {
-    const err = await putRes.json();
-    throw new Error(err.message || `HTTP ${putRes.status}`);
-  }
-}
+/* GitHub sync removed — books are saved locally only */
 
 // ═══════════════════════════════════════
 //  EXPORT / IMPORT
@@ -1000,22 +972,12 @@ function esc(s) {
 // ═══════════════════════════════════════
 
 // ═══════════════════════════════════════
-//  LOAD BOOKS FROM GITHUB
+//  LOAD BOOKS FROM LOCAL STORAGE
 // ═══════════════════════════════════════
-const BOOKS_JSON_URL = 'https://raw.githubusercontent.com/fabioscrive/imusa/main/books.json';
-
-async function loadBooksFromGithub() {
-  try {
-    const res = await fetch(BOOKS_JSON_URL + '?t=' + Date.now());
-    if (res.ok) {
-      const data = await res.json();
-      setBooks(data.books || []);
-    }
-  } catch(e) { /* silent fail */ }
-}
+// Books are stored locally in the browser, no GitHub sync
 
 (async function init() {
-  await loadBooksFromGithub();
+  loadBooksFromLocalStorage();
 })();
 </script>
 
