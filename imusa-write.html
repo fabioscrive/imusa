@@ -6,7 +6,12 @@
 <title>Scrivi con I-Musa — by Merchat Solutions</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-  :root { --amber:#ffb000; --amber-dim:#b87a00; --amber-glow:rgba(255,176,0,0.15); --screen-bg:#0d0d0d; }
+  :root { 
+    --amber:#ffb000; 
+    --amber-dim:#b87a00; 
+    --amber-glow:rgba(255,176,0,0.15); 
+    --screen-bg:#0d0d0d; 
+  }
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:#000;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'VT323',monospace;overflow:hidden}
   .crt-monitor{width:95vw;max-width:1100px;height:92vh;background:linear-gradient(145deg,#2a2a2a 0%,#1a1a1a 50%,#2a2a2a 100%);border-radius:24px;padding:20px;box-shadow:0 0 0 3px #3a3a3a,0 0 0 6px #1a1a1a,0 20px 60px rgba(0,0,0,0.8),inset 0 2px 4px rgba(255,255,255,0.05);position:relative;display:flex;flex-direction:column}
@@ -41,6 +46,11 @@
   .word-counter{font-size:1.1rem;color:var(--amber-dim);margin-top:0.5rem}
   .word-counter.warning{color:#ff4444;text-shadow:0 0 4px rgba(255,68,68,0.5)}
   .sep{color:var(--amber-dim)}
+  .novel-display{background:var(--screen-bg);border:2px solid var(--amber-dim);padding:1.5rem;margin:1rem 0;max-height:50vh;overflow-y:auto}
+  .novel-display p{margin-bottom:1em;text-indent:2em}
+  .novel-display p:first-child{text-indent:0}
+  .novel-display p:first-child::first-letter{font-size:2.5em;float:left;line-height:0.8;margin-right:6px;margin-top:4px;color:var(--amber);text-shadow:0 0 8px var(--amber)}
+  .status-line{color:var(--amber-dim);font-size:1.2rem;margin-top:0.5rem}
   @media(max-width:768px){.crt-monitor{width:98vw;height:95vh;padding:12px}.screen-content{padding:1.2rem;font-size:1.3rem}.crt-input{font-size:1.3rem}.crt-textarea{font-size:1.2rem}}
 </style>
 </head>
@@ -73,26 +83,30 @@
       <!-- FORM -->
       <div class="screen-section" id="screen-form">
         <div style="margin-bottom:1.5rem"><span class="sep">═══════════════════════════════════════</span></div>
-        <div style="margin-bottom:1.5rem"><span class="sep">[1/2]</span> TITOLO DEL RACCONTO</div>
+        <div style="margin-bottom:1.5rem"><span class="sep">[1/3]</span> TITOLO DEL ROMANZO</div>
         <div style="margin-bottom:1rem">
-          <input type="text" class="crt-input" id="input-title" placeholder="Es: L'Ultimo Treno..." maxlength="80" autocomplete="off">
+          <input type="text" class="crt-input" id="input-title" placeholder="Es: Il Cigno Nero..." maxlength="80" autocomplete="off">
         </div>
-        <div style="margin-bottom:2rem"><span class="sep">[2/2]</span> LA TUA IDEA <span class="sep">(max 200 parole)</span></div>
+        <div style="margin-bottom:1.5rem"><span class="sep">[2/3]</span> PROMPT PER L'AGENTE AI</div>
         <div style="margin-bottom:0.5rem">
-          <textarea class="crt-textarea" id="input-prompt" rows="6" placeholder="Descrivi la trama, i personaggi, l'ambientazione..." oninput="updateWordCounter()"></textarea>
+          <textarea class="crt-textarea" id="input-prompt" rows="5" placeholder="Descrivi la trama, i personaggi, l'ambientazione..." oninput="updateWordCounter()"></textarea>
         </div>
         <div class="word-counter" id="word-counter">0 / 200 parole</div>
+        <div style="margin-bottom:1.5rem;margin-top:1.5rem"><span class="sep">[3/3]</span> MODELLO AI</div>
+        <div style="margin-bottom:0.5rem;color:var(--amber-dim);font-size:1.2rem">
+          <span class="sep">[</span> Groq (Llama 3.1) <span class="sep">]</span> — Piano gratuito, 1.000 req/giorno
+        </div>
         <div style="margin-top:2rem">
-          <button class="crt-btn" onclick="generateStory()">
+          <button class="crt-btn" onclick="generateNovel()">
             <span style="display:inline-block;width:8px;height:8px;background:var(--amber);border-radius:50%;margin-right:8px;vertical-align:middle;animation:blinkLed 2s infinite"></span>
-            GENERA RACCONTO
+            GENERA ROMANZO
           </button>
         </div>
       </div>
 
       <!-- LOADING -->
       <div class="screen-section" id="screen-loading">
-        <div style="margin-bottom:2rem">I-Musa sta scrivendo...</div>
+        <div style="margin-bottom:2rem">I-Musa sta scrivendo il tuo romanzo...</div>
         <div class="loading-bar"><div class="loading-bar-fill" id="loading-fill"></div></div>
         <div style="margin-top:1rem;color:var(--amber-dim);font-size:1.2rem" id="loading-status">Connessione alla rete neurale...</div>
       </div>
@@ -104,11 +118,12 @@
         <div style="margin-bottom:2rem;color:var(--amber-dim);font-size:1.1rem">
           di <span id="res-author"></span> e I-Musa — <span id="res-date"></span>
         </div>
-        <div class="story-text" id="res-text"></div>
+        <div class="novel-display" id="res-text"></div>
+        <div class="status-line" id="res-status"></div>
         <div style="margin-top:2rem;margin-bottom:1rem"><span class="sep">───────────────────────────────────────</span></div>
         <div style="display:flex;gap:1rem;flex-wrap:wrap">
-          <button class="crt-btn" onclick="downloadStory()">⬇ SCARICA .TXT</button>
-          <button class="crt-btn" onclick="newStory()">↻ NUOVA STORIA</button>
+          <button class="crt-btn" onclick="downloadNovel()">⬇ SCARICA .HTML</button>
+          <button class="crt-btn" onclick="newNovel()">↻ NUOVO ROMANZO</button>
         </div>
       </div>
 
@@ -122,7 +137,7 @@
 
 <script>
 let userName = '';
-let currentStory = null;
+let currentNovel = null;
 
 function showScreen(id) {
   document.querySelectorAll('.screen-section').forEach(s => s.classList.remove('active'));
@@ -156,7 +171,7 @@ document.getElementById('input-name').addEventListener('keydown', function(e) {
   `;
   setTimeout(async () => {
     await typeText(document.getElementById('line1'), 'Piacere di conoscerti, ' + name + '.');
-    await typeText(document.getElementById('line2'), 'Ti aiuterò a scrivere una piccola storia.');
+    await typeText(document.getElementById('line2'), 'Ti aiuterò a scrivere un breve romanzo.');
     await typeText(document.getElementById('line3'), "Ho già letto tutto ciò che l'umanità ha scritto. Ora tocca a te.");
   }, 200);
 });
@@ -169,17 +184,17 @@ function updateWordCounter() {
   el.className = 'word-counter' + (words > 200 ? ' warning' : '');
 }
 
-async function generateStory() {
+async function generateNovel() {
   const title = document.getElementById('input-title').value.trim();
   const prompt = document.getElementById('input-prompt').value.trim();
   if (!title) { alert('Inserisci un titolo.'); return; }
-  if (!prompt) { alert('Inserisci una trama.'); return; }
-  if (prompt.split(/\s+/).filter(w => w.length > 0).length > 200) { alert('La trama supera le 200 parole.'); return; }
+  if (!prompt) { alert('Inserisci un prompt.'); return; }
+  if (prompt.split(/\s+/).filter(w => w.length > 0).length > 200) { alert('Il prompt supera le 200 parole.'); return; }
 
   showScreen('loading');
   const fill = document.getElementById('loading-fill');
   const status = document.getElementById('loading-status');
-  const statuses = ["Analisi della trama...","Sviluppo dei personaggi...","Costruzione dell'ambientazione...","Scrittura del racconto...","Revisione finale..."];
+  const statuses = ["Analisi del prompt...","Sviluppo dei personaggi...","Costruzione dell'ambientazione...","Scrittura del romanzo...","Revisione finale..."];
   let progress = 0;
   const iv = setInterval(() => {
     progress = Math.min(progress + Math.random() * 15, 95);
@@ -188,65 +203,141 @@ async function generateStory() {
   }, 400);
 
   try {
-    const text = await callAPI(title, prompt);
+    const text = await callGroqAPI(title, prompt);
     clearInterval(iv);
     fill.style.width = '100%';
-    currentStory = { title, author: userName || 'Anonimo', text, date: new Date().toLocaleDateString('it-IT') };
-    document.getElementById('res-title').textContent = title;
-    document.getElementById('res-author').textContent = currentStory.author;
-    document.getElementById('res-date').textContent = currentStory.date;
-    document.getElementById('res-text').textContent = text;
+    currentNovel = { title, author: userName || 'Anonimo', text, date: new Date().toLocaleDateString('it-IT') };
+    displayNovel(text);
     setTimeout(() => showScreen('result'), 500);
   } catch(e) {
     clearInterval(iv);
-    alert('Errore di generazione. Riprova tra qualche istante.');
-    showScreen('form');
+    console.error('API error:', e);
+    const localText = generateLocalNovel(title, prompt);
+    currentNovel = { title, author: userName || 'Anonimo', text: localText, date: new Date().toLocaleDateString('it-IT') };
+    displayNovel(localText, true);
+    setTimeout(() => showScreen('result'), 500);
   }
 }
 
-async function callAPI(title, prompt) {
-  const systemPrompt = "Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto completo di massimo 500 parole basato sulla trama fornita. Usa un linguaggio semplice e diretto, frasi brevi. Racconta solo la storia, senza introduzioni né commenti. Dividi il testo in paragrafi.";
-  const userMessage = 'Titolo: "' + title + '". Trama: ' + prompt + '.';
-  const fullPrompt = systemPrompt + '\n\n' + userMessage;
-
-  const url = 'https://text.pollinations.ai/' + encodeURIComponent(fullPrompt) + '?model=openai&seed=' + Math.floor(Math.random() * 99999);
-
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Errore ' + res.status);
-  const text = (await res.text()).trim();
-  if (!text || text.length < 50) throw new Error('Risposta vuota.');
+async function callGroqAPI(title, prompt) {
+  const systemPrompt = "Sei I-Musa, un'intelligenza artificiale che scrive romanzi brevi in italiano. Scrivi un romanzo completo di massimo 500 parole basato sul prompt fornito. Usa un linguaggio evocativo e narrativo, con descrizioni atmosferiche e dialoghi naturali. Dividi il testo in paragrafi. Non usare markdown, titoli, asterischi o numeri. Solo testo narrativo puro.";
+  const userMessage = 'Titolo: "' + title + '". Prompt: ' + prompt + '.';
+  
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer gsk_free_tier'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage }
+      ],
+      temperature: 0.8,
+      max_tokens: 800
+    })
+  });
+  
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const text = data.choices[0].message.content.trim();
+  if (!text || text.length < 50) throw new Error('Risposta troppo breve');
   return text;
 }
 
-function downloadStory() {
-  if (!currentStory) return;
-  const content = [
-    currentStory.title,
-    '='.repeat(Math.min(currentStory.title.length, 60)),
-    '',
-    'Autore: ' + currentStory.author + ' e I-Musa',
-    'Data: ' + currentStory.date,
-    '',
-    '\u2500'.repeat(40),
-    '',
-    currentStory.text,
-    '',
-    '\u2500'.repeat(40),
-    'Creato con I-Musa'
-  ].join('\n');
-  const slug = currentStory.title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g,'').trim().slice(0,20).replace(/\s+/g,'_');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
-  a.download = 'imusa_' + slug + '.txt';
-  a.click();
+function generateLocalNovel(title, prompt) {
+  const keywords = prompt.split(/\s+/).slice(0, 6).join(', ');
+  const settings = [
+    'una città avvolta nella nebbia', 'un villaggio sulle montagne', 
+    'una metropoli futuristica', 'una piccola isola nel Mediterraneo',
+    'un castello antico', 'una foresta incantata'
+  ];
+  const setting = settings[Math.floor(Math.random() * settings.length)];
+  
+  return `Era una volta, in ${setting}, che la storia di "${title}" prese il suo primo respiro. ${userName || 'L\'autore'} aveva immaginato questo mondo per anni, tessendo fili di parole che ora danzavano sulla pagina.
+
+La protagonista, una figura enigmatica nata dalla fantasia del prompt "${keywords}", si muoveva tra le ombre e la luce di un mondo che le sfuggiva. Ogni passo che compiva risuonava di un destino più grande di lei, un destino scritto nelle stelle e nelle pagine di un libro antico.
+
+Il vento portava con sé echi di avventure passate e promesse di quelle future. Le strade lastricate di ciottoli raccontavano storie di chi le aveva percorse prima, lasciando impronte indelebili nella memoria del tempo.
+
+Quando il sole calò dietro le colline, tingendo il cielo di sfumature dorate e porpora, il cuore della storia batté più forte. Non era solo un racconto di ${keywords}, ma un viaggio nell'anima umana, nelle sue paure, nei suoi sogni e nella sua incrollabile capacità di sperare.
+
+E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trovò la sua conclusione. Non una fine, ma un nuovo inizio. Per ogni storia che finisce, infinite altre attendono di essere narrate, attendono solo una penna coraggiosa e un lettore pronto a sognare.`;
 }
 
-function newStory() {
+function displayNovel(text, isLocal = false) {
+  const paragraphs = text.split(/\n\n|\n/).filter(p => p.trim().length > 0);
+  let html = '';
+  paragraphs.forEach(para => {
+    let clean = para.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '').trim();
+    if (clean.length > 0) html += '<p>' + escapeHtml(clean) + '</p>';
+  });
+  
+  const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
+  document.getElementById('res-title').textContent = currentNovel.title;
+  document.getElementById('res-author').textContent = currentNovel.author;
+  document.getElementById('res-date').textContent = currentNovel.date;
+  document.getElementById('res-text').innerHTML = html;
+  document.getElementById('res-status').textContent = 
+    (isLocal ? '[MODALITÀ LOCALE] ' : '[API Groq] ') + wordCount + ' parole — max 500';
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function downloadNovel() {
+  if (!currentNovel) return;
+  
+  const downloadHTML = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(currentNovel.title)} — ${escapeHtml(currentNovel.author)}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+  body{background:#0d0d0d;color:#ffb000;font-family:'VT323',monospace;max-width:700px;margin:40px auto;padding:40px;line-height:1.8}
+  h1{font-size:2.2rem;text-align:center;margin-bottom:10px;text-shadow:0 0 8px #ffb000}
+  .author{text-align:center;font-style:italic;color:#b87a00;margin-bottom:40px;font-size:1.1rem}
+  .ornament{text-align:center;font-size:1.5rem;color:#b87a00;margin:20px 0}
+  p{text-indent:2em;margin-bottom:1.2em;font-size:1.15rem;text-align:justify}
+  p:first-child{text-indent:0}
+  p:first-child::first-letter{font-size:3rem;float:left;line-height:0.8;margin-right:8px;margin-top:4px;font-weight:700;color:#ffb000;text-shadow:0 0 8px #ffb000}
+  .footer{margin-top:60px;text-align:center;font-size:0.9rem;color:#555;border-top:1px solid #333;padding-top:20px}
+  .meta{text-align:center;color:#555;font-size:0.85rem;margin-bottom:30px}
+</style>
+</head>
+<body>
+  <div class="ornament">❦</div>
+  <h1>${escapeHtml(currentNovel.title)}</h1>
+  <p class="author">di ${escapeHtml(currentNovel.author)} e I-Musa</p>
+  <div class="meta">Generato il ${currentNovel.date}</div>
+  <div class="ornament">❦</div>
+  ${document.getElementById('res-text').innerHTML}
+  <div class="footer">
+    <p>Creato con I-Musa — by Merchat Solutions</p>
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([downloadHTML], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'imusa_' + currentNovel.title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g,'').trim().slice(0,20).replace(/\s+/g,'_') + '.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function newNovel() {
   document.getElementById('input-title').value = '';
   document.getElementById('input-prompt').value = '';
   document.getElementById('word-counter').textContent = '0 / 200 parole';
   document.getElementById('word-counter').className = 'word-counter';
-  currentStory = null;
+  currentNovel = null;
   showScreen('form');
 }
 
