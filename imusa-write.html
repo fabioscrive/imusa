@@ -3,705 +3,746 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I-Musa — Scrivi con l'IA</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<title>I-Musa — CRT Terminal</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
   :root {
-    --black: #0a0a0a;
-    --off-white: #f0ede6;
-    --amber: #d4a843;
-    --amber-dark: #8a6520;
-    --amber-dim: rgba(212,168,67,0.15);
-    --muted: #6b6860;
-    --border: rgba(212,168,67,0.18);
-    --terminal-bg: #0d0d0d;
-    --terminal-border: rgba(212,168,67,0.2);
-    --danger: #8b2020;
-    --success: #1a5c3a;
+    --amber: #ffb000;
+    --amber-dim: #b87a00;
+    --amber-glow: rgba(255, 176, 0, 0.15);
+    --screen-bg: #0d0d0d;
+    --crt-bg: #1a1a1a;
   }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+
   body {
-    background: var(--black);
-    color: var(--off-white);
-    font-family: 'Instrument Sans', sans-serif;
-    overflow-x: hidden;
+    background: #000;
     min-height: 100vh;
-  }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 0; opacity: 0.35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    overflow: hidden;
   }
 
-  /* ── LAYOUT ── */
-  .app-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  /* CRT Monitor Frame */
+  .crt-monitor {
+    width: 95vw;
+    max-width: 1100px;
+    height: 92vh;
+    background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #2a2a2a 100%);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow:
+      0 0 0 3px #3a3a3a,
+      0 0 0 6px #1a1a1a,
+      0 20px 60px rgba(0,0,0,0.8),
+      inset 0 2px 4px rgba(255,255,255,0.05);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
 
-  /* ── NAV ── */
-  nav {
-    position: fixed; top:0;left:0;right:0; z-index:100;
-    padding: 1.2rem 2.5rem;
-    display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--border);
-    background: rgba(10,10,10,.92); backdrop-filter: blur(14px);
-  }
-  .nav-logo { font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.3em;color:var(--amber);text-transform:uppercase; }
-  .nav-links { display:flex;gap:2rem;list-style:none; }
-  .nav-links a { font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .3s; cursor:pointer; }
-  .nav-links a:hover, .nav-links a.active { color:var(--amber); }
-
-  /* ── MAIN ── */
-  main { flex:1; padding-top: 70px; }
-  .page { display:none; padding: 3rem 2.5rem; max-width: 900px; margin: 0 auto; }
-  .page.active { display:block; }
-
-  /* ── TERMINAL SCREEN (i-Musa) ── */
-  .terminal-screen {
-    min-height: calc(100vh - 70px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 2rem;
-  }
-  .terminal-box {
-    width: 100%; max-width: 700px;
-    background: var(--terminal-bg);
-    border: 1px solid var(--terminal-border);
-    box-shadow: 0 0 60px rgba(212,168,67,0.06);
-  }
-  .terminal-bar {
-    padding: .7rem 1rem;
-    border-bottom: 1px solid rgba(212,168,67,.12);
-    display: flex; align-items: center; gap: .5rem;
-  }
-  .t-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(212,168,67,.18); }
-  .t-title {
-    font-family: 'DM Mono', monospace; font-size: .58rem;
-    color: var(--muted); letter-spacing: .2em; margin: 0 auto;
+  .crt-brand {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #555;
+    letter-spacing: 0.5em;
     text-transform: uppercase;
+    padding-bottom: 8px;
+    font-family: 'VT323', monospace;
   }
-  .terminal-body {
-    padding: 2rem 1.8rem;
-    font-family: 'DM Mono', monospace;
-    font-size: .9rem; line-height: 2.2;
-    color: rgba(212,168,67,.45);
-    min-height: 300px;
+
+  .crt-screen {
+    flex: 1;
+    background: var(--screen-bg);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.8),
+      inset 0 0 80px rgba(0,0,0,0.4);
+    border: 2px solid #0a0a0a;
   }
-  .t-line { display: block; }
-  .t-prompt { color: rgba(212,168,67,.28); }
-  .t-text { color: var(--off-white); font-family: 'DM Serif Display', serif; font-size: 1.05rem; font-style: italic; }
-  .t-amber { color: var(--amber); }
-  .t-cursor {
-    display: inline-block; width: 7px; height: 1em;
+
+  .screen-content {
+    position: absolute;
+    inset: 0;
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+    font-size: 1.6rem;
+    line-height: 1.6;
+    color: var(--amber);
+    text-shadow: 0 0 4px var(--amber), 0 0 8px var(--amber-glow);
+  }
+
+  .crt-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .crt-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 11;
+    animation: noise 0.5s steps(2) infinite;
+  }
+
+  .crt-vignette {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.6);
+    pointer-events: none;
+    z-index: 12;
+  }
+
+  .power-led {
+    position: absolute;
+    bottom: -14px;
+    right: 30px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     background: var(--amber);
-    animation: cur 1s step-end infinite;
+    box-shadow: 0 0 6px var(--amber), 0 0 12px var(--amber);
+    animation: blink 3s ease-in-out infinite;
+  }
+
+  .monitor-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding-top: 12px;
+  }
+
+  .ctrl-btn {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .ctrl-btn:hover { background: #555; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes noise {
+    0% { opacity: 0.03; }
+    50% { opacity: 0.05; }
+    100% { opacity: 0.03; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 12px;
+    height: 1.2em;
+    background: var(--amber);
+    animation: cursorBlink 1s step-end infinite;
     vertical-align: text-bottom;
+    margin-left: 2px;
   }
-  .t-input-line {
-    display: flex; align-items: center; gap: .6rem; margin-top: 1rem;
-  }
-  .t-input {
-    background: transparent; border: none; border-bottom: 1px solid var(--amber-dark);
-    color: var(--amber); font-family: 'DM Mono', monospace; font-size: .9rem;
-    outline: none; flex: 1; padding: .3rem 0;
+
+  .crt-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--amber-dim);
+    color: var(--amber);
+    font-family: 'VT323', monospace;
+    font-size: 1.6rem;
+    outline: none;
+    width: 100%;
+    max-width: 500px;
     caret-color: var(--amber);
+    text-shadow: 0 0 4px var(--amber);
+    padding: 0.2rem 0;
   }
-  .t-input::placeholder { color: rgba(212,168,67,.25); }
-  .t-btn {
-    font-family: 'DM Mono', monospace; font-size: .65rem;
-    letter-spacing: .2em; text-transform: uppercase;
-    background: var(--amber-dark); color: var(--black);
-    border: none; padding: .5rem 1.2rem; cursor: pointer;
-    transition: all .2s;
-  }
-  .t-btn:hover { background: var(--amber); }
-  .t-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  @keyframes cur { 0%,100%{opacity:1} 50%{opacity:0} }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-  .fade-in { animation: fadeUp .6s ease forwards; }
+  .crt-input::placeholder {
+    color: var(--amber-dim);
+    text-shadow: none;
+  }
 
-  /* ── SCENE IMAGES ── */
-  .scene-wrap {
-    position: relative; overflow: hidden;
-    border: 1px solid var(--border); margin: 2rem 0;
+  .crt-textarea {
+    background: transparent;
+    border: 2px solid var(--amber-dim);
+    color: var(--amber);
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    outline: none;
+    width: 100%;
+    caret-color: var(--amber);
+    text-shadow: 0 0 4px var(--amber);
+    padding: 0.5rem;
+    resize: vertical;
+    line-height: 1.5;
   }
-  .scene-wrap img { width: 100%; display: block; filter: brightness(.7); }
-  .scene-caption {
-    position: absolute; bottom: 1rem; left: 1rem;
-    font-family: 'DM Mono', monospace; font-size: .58rem;
-    letter-spacing: .3em; color: rgba(212,168,67,.7);
-    text-transform: uppercase; display: flex; align-items: center; gap: .5rem;
-  }
-  .led { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: blink 2s ease-in-out infinite; }
 
-  /* ── FORMS ── */
-  .form-section {
-    background: rgba(13,13,13,.8);
-    border: 1px solid var(--border);
-    padding: 2.5rem;
-    margin-bottom: 2rem;
+  .crt-textarea::placeholder {
+    color: var(--amber-dim);
+    text-shadow: none;
   }
-  .form-title {
-    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
-    letter-spacing: .25em; color: var(--amber);
-    margin-bottom: 1.5rem; padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .form-group { margin-bottom: 1.5rem; }
-  .form-group label {
-    display: block; font-family: 'DM Mono', monospace;
-    font-size: .65rem; letter-spacing: .25em;
-    color: var(--muted); text-transform: uppercase;
-    margin-bottom: .6rem;
-  }
-  .form-group input, .form-group textarea {
-    width: 100%; background: var(--black);
-    border: 1px solid var(--border); color: var(--off-white);
-    font-family: 'Instrument Sans', sans-serif; font-size: 1rem;
-    padding: .8rem 1rem; outline: none;
-    transition: border-color .2s;
-  }
-  .form-group input:focus, .form-group textarea:focus { border-color: var(--amber-dark); }
-  .form-group textarea { min-height: 160px; resize: vertical; line-height: 1.7; }
-  .char-counter {
-    font-family: 'DM Mono', monospace; font-size: .6rem;
-    color: var(--muted); text-align: right; margin-top: .3rem;
-    letter-spacing: .1em;
-  }
-  .char-counter.warning { color: var(--danger); }
-  .char-counter.ok { color: var(--success); }
 
-  /* ── BUTTONS ── */
-  .btn {
-    font-family: 'DM Mono', monospace; font-size: .68rem;
-    letter-spacing: .2em; text-transform: uppercase;
-    padding: .9rem 2rem; border: none; cursor: pointer;
-    transition: all .3s; display: inline-flex; align-items: center; gap: .5rem;
+  .crt-btn {
+    background: transparent;
+    border: 2px solid var(--amber);
+    color: var(--amber);
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+    text-shadow: 0 0 4px var(--amber);
+    margin-top: 1rem;
+  }
+
+  .crt-btn:hover {
+    background: var(--amber);
+    color: var(--screen-bg);
+    text-shadow: none;
+    box-shadow: 0 0 20px var(--amber-glow);
+  }
+
+  .crt-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: var(--amber-dim);
+  }
+
+  .screen-section {
+    display: none;
+  }
+  .screen-section.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .story-text {
+    white-space: pre-wrap;
+    line-height: 1.8;
+    font-size: 1.4rem;
+  }
+
+  .loading-bar {
+    width: 300px;
+    height: 4px;
+    border: 1px solid var(--amber-dim);
+    margin-top: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .loading-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: var(--amber);
+    box-shadow: 0 0 10px var(--amber);
+    transition: width 0.3s;
+  }
+
+  .screen-content::-webkit-scrollbar {
+    width: 8px;
+  }
+  .screen-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .screen-content::-webkit-scrollbar-thumb {
+    background: var(--amber-dim);
+    border-radius: 4px;
+  }
+
+  .word-counter {
+    font-size: 1.1rem;
+    color: var(--amber-dim);
+    margin-top: 0.5rem;
+  }
+  .word-counter.warning {
+    color: #ff4444;
+    text-shadow: 0 0 4px rgba(255,68,68,0.5);
+  }
+
+  /* ═══ PIXEL ART FOLDER LIBRARY ICON ═══ */
+  .library-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    z-index: 20;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    transition: transform 0.2s, filter 0.2s;
     text-decoration: none;
   }
-  .btn-primary { background: var(--amber); color: var(--black); }
-  .btn-primary:hover { background: var(--off-white); }
-  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
-  .btn-outline:hover { border-color: var(--amber-dark); color: var(--amber); }
-  .btn-danger { background: var(--danger); color: var(--off-white); }
-
-  /* ── STORY OUTPUT ── */
-  .story-output {
-    background: var(--terminal-bg);
-    border: 1px solid var(--terminal-border);
-    padding: 2rem;
-    margin: 2rem 0;
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.15rem; line-height: 1.85;
-    color: rgba(240,237,230,.85);
-    white-space: pre-wrap;
+  .library-icon:hover {
+    transform: scale(1.1);
+    filter: brightness(1.3);
   }
-  .story-meta {
-    display: flex; gap: 2rem; margin-bottom: 1.5rem;
-    font-family: 'DM Mono', monospace; font-size: .6rem;
-    letter-spacing: .2em; color: var(--muted); text-transform: uppercase;
+  .library-icon:hover .folder-label {
+    text-shadow: 0 0 8px var(--amber), 0 0 16px var(--amber-glow);
+  }
+  .folder-pixel {
+    width: 48px;
+    height: 40px;
+    image-rendering: pixelated;
+  }
+  .folder-label {
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    color: var(--amber);
+    text-shadow: 0 0 4px var(--amber);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
-  /* ── COVER PREVIEW ── */
-  .cover-preview {
-    width: 100%; max-width: 400px; margin: 1.5rem auto;
-    border: 1px solid var(--border);
-    position: relative; overflow: hidden;
-    aspect-ratio: 2/3;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1510 50%, #0a0a0a 100%);
-  }
-  .cover-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cover-overlay {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    justify-content: flex-end; padding: 2rem;
-    background: linear-gradient(to top, rgba(10,10,10,.95) 0%, rgba(10,10,10,.4) 50%, transparent 100%);
-  }
-  .cover-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(1.4rem, 4vw, 2.2rem);
-    color: var(--off-white); line-height: 1.1;
-    margin-bottom: .5rem; text-align: center;
-  }
-  .cover-author {
-    font-family: 'DM Mono', monospace;
-    font-size: .65rem; letter-spacing: .25em;
-    color: var(--amber); text-transform: uppercase;
-    text-align: center;
-  }
-
-  /* ── BOOKSHELF ── */
-  .bookshelf {
+  /* ═══ LIBRARY SCREEN ═══ */
+  .library-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 2rem; margin-top: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
   }
-  .book-card {
-    background: var(--terminal-bg);
-    border: 1px solid var(--border);
-    transition: transform .3s, border-color .3s;
+  .library-book {
+    border: 2px solid var(--amber-dim);
+    padding: 1rem;
     cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255,176,0,0.03);
   }
-  .book-card:hover { transform: translateY(-4px); border-color: var(--amber-dark); }
-  .book-card-cover {
-    aspect-ratio: 2/3; position: relative; overflow: hidden;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1510 50%, #0a0a0a 100%);
+  .library-book:hover {
+    border-color: var(--amber);
+    box-shadow: 0 0 15px var(--amber-glow);
+    background: rgba(255,176,0,0.08);
   }
-  .book-card-cover { pointer-events: none; }
-  .book-card-cover img { width: 100%; height: 100%; object-fit: cover; }
-  .book-card-info { padding: 1rem; }
-  .book-card-title {
-    font-family: 'DM Serif Display', serif; font-size: 1rem;
-    color: var(--off-white); margin-bottom: .3rem;
+  .library-book-title {
+    font-size: 1.3rem;
+    text-shadow: 0 0 4px var(--amber);
+    margin-bottom: 0.3rem;
     line-height: 1.2;
   }
-  .book-card-author {
-    font-family: 'DM Mono', monospace; font-size: .55rem;
-    letter-spacing: .15em; color: var(--muted); text-transform: uppercase;
+  .library-book-author {
+    font-size: 1rem;
+    color: var(--amber-dim);
   }
-  .book-card-date {
-    font-family: 'DM Mono', monospace; font-size: .5rem;
-    color: var(--amber-dark); margin-top: .5rem;
-    letter-spacing: .1em;
+  .library-book-date {
+    font-size: 0.9rem;
+    color: var(--amber-dim);
+    margin-top: 0.5rem;
+  }
+  .library-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--amber-dim);
+    font-size: 1.3rem;
   }
 
-  /* ── LOADING ── */
-  .loading-overlay {
-    position: fixed; inset: 0; background: rgba(10,10,10,.95);
-    z-index: 200; display: none; align-items: center; justify-content: center;
-    flex-direction: column; gap: 1.5rem;
+  /* Reader inside library */
+  .reader-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
-  .loading-overlay.active { display: flex; }
-  .loading-text {
-    font-family: 'DM Mono', monospace; font-size: .7rem;
-    letter-spacing: .3em; color: var(--amber); text-transform: uppercase;
-  }
-  .loading-bar {
-    width: 200px; height: 2px; background: var(--border);
-    position: relative; overflow: hidden;
-  }
-  .loading-bar::after {
-    content: ''; position: absolute; left: -50%; top: 0;
-    width: 50%; height: 100%; background: var(--amber);
-    animation: loadSlide 1.5s ease-in-out infinite;
-  }
-  @keyframes loadSlide { 0%{left:-50%} 100%{left:100%} }
-
-  /* ── TOAST ── */
-  #toast {
-    position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
-    background: var(--terminal-bg); border-left: 3px solid var(--amber);
-    padding: 1rem 1.5rem; font-family: 'DM Mono', monospace;
-    font-size: .7rem; letter-spacing: .15em; color: var(--off-white);
-    transform: translateY(80px); opacity: 0; transition: all .3s;
-    max-width: 320px;
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
-  #toast.error { border-left-color: var(--danger); }
-  #toast.success { border-left-color: var(--success); }
-
-  /* ── GITHUB CONFIG ── */
-  .gh-config {
-    background: rgba(13,13,13,.6);
-    border: 1px solid var(--border);
-    padding: 1.5rem; margin-bottom: 2rem;
-  }
-  .gh-config h4 {
-    font-family: 'DM Mono', monospace; font-size: .7rem;
-    letter-spacing: .2em; color: var(--amber); text-transform: uppercase;
+  .reader-meta {
+    color: var(--amber-dim);
+    font-size: 1.1rem;
     margin-bottom: 1rem;
   }
 
-  /* ── RESPONSIVE ── */
-  @media(max-width:700px){
-    nav{padding:1rem 1.2rem;}
-    .nav-links{gap:1rem;}
-    .terminal-body{padding:1.5rem 1.2rem; font-size:.8rem;}
-    .form-section{padding:1.5rem;}
-    .bookshelf{grid-template-columns:repeat(2,1fr); gap:1rem;}
+  /* Error message */
+  .error-msg {
+    color: #ff4444;
+    text-shadow: 0 0 4px rgba(255,68,68,0.5);
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .crt-monitor { width: 98vw; height: 95vh; padding: 12px; }
+    .screen-content { padding: 1.2rem; font-size: 1.3rem; }
+    .crt-input { font-size: 1.3rem; }
+    .crt-textarea { font-size: 1.2rem; }
+    .library-icon { top: 1rem; right: 1rem; }
+    .folder-pixel { width: 36px; height: 30px; }
+    .folder-label { font-size: 0.75rem; }
+    .library-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
+<div class="crt-monitor">
+  <div class="crt-brand">I-Musa Terminal v2.0</div>
+  <div class="crt-screen">
+    <div class="crt-vignette"></div>
 
+    <!-- ═══ PIXEL ART FOLDER ICON (top-right) ═══ -->
+    <a class="library-icon" onclick="goToLibrary()" title="Libreria">
+      <svg class="folder-pixel" viewBox="0 0 16 14" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="2" width="16" height="12" fill="var(--amber)" opacity="0.9"/>
+        <rect x="0" y="2" width="16" height="1" fill="var(--amber-dim)"/>
+        <rect x="0" y="13" width="16" height="1" fill="var(--amber-dim)"/>
+        <rect x="0" y="2" width="1" height="12" fill="var(--amber-dim)"/>
+        <rect x="15" y="2" width="1" height="12" fill="var(--amber-dim)"/>
+        <rect x="1" y="0" width="5" height="2" fill="var(--amber)" opacity="0.9"/>
+        <rect x="1" y="0" width="5" height="1" fill="var(--amber-dim)"/>
+        <rect x="1" y="0" width="1" height="2" fill="var(--amber-dim)"/>
+        <rect x="5" y="0" width="1" height="2" fill="var(--amber-dim)"/>
+        <rect x="1" y="3" width="14" height="1" fill="var(--amber-dim)" opacity="0.3"/>
+        <rect x="1" y="4" width="14" height="8" fill="var(--amber)" opacity="0.15"/>
+        <rect x="3" y="5" width="2" height="6" fill="var(--amber-dim)" opacity="0.5"/>
+        <rect x="6" y="5" width="2" height="6" fill="var(--amber-dim)" opacity="0.5"/>
+        <rect x="9" y="5" width="2" height="6" fill="var(--amber-dim)" opacity="0.5"/>
+      </svg>
+      <span class="folder-label">Libreria</span>
+    </a>
 
+    <div class="screen-content" id="screen">
 
-<div class="app-wrap">
-
-  <!-- NAV -->
-  <nav>
-    <a href="index.html" class="nav-logo" style="text-decoration:none;">Torna alla pagina principale</a>
-    <ul class="nav-links">
-      <li><a onclick="showPage('terminal')" id="nav-terminal" class="active">Terminale</a></li>
-      <li><a onclick="showPage('write')" id="nav-write">Scrivi</a></li>
-      <li><a onclick="showPage('library')" id="nav-library">Libri</a></li>
-
-    </ul>
-  </nav>
-
-  <main>
-
-    <!-- ═══ TERMINALE i-MUSA ═══ -->
-    <div class="page active" id="page-terminal">
-      <div class="terminal-screen">
-        <div class="terminal-box">
-          <div class="terminal-bar">
-            <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
-            <div class="t-title">i-musa_v2.9 — sessione_attiva</div>
-          </div>
-          <div class="terminal-body" id="terminal-body">
-            <span class="t-line"><span class="t-prompt">// </span><span class="t-amber">connessione stabilita</span></span>
-            <span class="t-line">&nbsp;</span>
-            <span class="t-line t-text fade-in">Benvenuto. Sono I-Musa.</span>
-            <span class="t-line t-text fade-in" style="animation-delay:.3s">Vuoi scrivere, o parlare?</span>
-            <span class="t-line">&nbsp;</span>
-            <span class="t-line fade-in" style="animation-delay:.6s"><span class="t-prompt">>> </span>Come ti chiami?<span class="t-cursor"></span></span>
-            <div class="t-input-line fade-in" style="animation-delay:.8s">
-              <span class="t-prompt">></span>
-              <input type="text" class="t-input" id="user-name-input" placeholder="Scrivi il tuo nome e premi Enter..." maxlength="40" onkeydown="if(event.key==='Enter')submitName()">
-              <button class="t-btn" onclick="submitName()">Invia</button>
-            </div>
-          </div>
+      <!-- === SCREEN 1: INTRO === -->
+      <div class="screen-section active" id="screen-intro">
+        <div style="margin-bottom: 2rem;">
+          <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          Benvenuto. Sono <span style="text-shadow: 0 0 8px var(--amber);">I-Musa</span>.
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          Vuoi scrivere, o parlare?
+        </div>
+        <div style="margin-bottom: 2rem;">
+          <span style="color: var(--amber-dim);">───────────────────────────────────────</span>
+        </div>
+        <div>
+          <span style="color: var(--amber-dim);">>></span> Come ti chiami?
+        </div>
+        <div style="margin-top: 1rem;">
+          <span style="color: var(--amber-dim);">></span>
+          <input type="text" class="crt-input" id="input-name" placeholder="Scrivi il tuo nome..." maxlength="40" autocomplete="off">
+          <span class="cursor"></span>
         </div>
       </div>
+
+      <!-- === SCREEN 2: GREETING === -->
+      <div class="screen-section" id="screen-greet">
+        <div id="greet-content"></div>
+      </div>
+
+      <!-- === SCREEN 3: FORM === -->
+      <div class="screen-section" id="screen-form">
+        <div style="margin-bottom: 1.5rem;">
+          <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <span style="color: var(--amber-dim);">[1/2]</span> TITOLO DEL RACCONTO
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <input type="text" class="crt-input" id="input-title" placeholder="Es: L'Ultimo Treno..." maxlength="80" autocomplete="off">
+        </div>
+        <div style="margin-bottom: 2rem;">
+          <span style="color: var(--amber-dim);">[2/2]</span> LA TUA IDEA <span style="color: var(--amber-dim);">(max 200 parole)</span>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+          <textarea class="crt-textarea" id="input-prompt" rows="6" placeholder="Descrivi la trama, i personaggi, l'ambientazione..." oninput="updateWordCounter()"></textarea>
+        </div>
+        <div class="word-counter" id="word-counter">0 / 200 parole</div>
+        <div style="margin-top: 2rem;">
+          <button class="crt-btn" id="btn-generate" onclick="generateStory()">
+            <span style="animation: blink 2s infinite; display: inline-block; width: 8px; height: 8px; background: var(--amber); border-radius: 50%; margin-right: 8px; vertical-align: middle;"></span>
+            GENERA RACCONTO
+          </button>
+        </div>
+      </div>
+
+      <!-- === SCREEN 4: LOADING === -->
+      <div class="screen-section" id="screen-loading">
+        <div style="margin-bottom: 2rem;">
+          I-Musa sta scrivendo...
+        </div>
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="loading-fill"></div>
+        </div>
+        <div style="margin-top: 1rem; color: var(--amber-dim); font-size: 1.2rem;" id="loading-status">
+          Connessione alla rete neurale...
+        </div>
+      </div>
+
+      <!-- === SCREEN 5: RESULT === -->
+      <div class="screen-section" id="screen-result">
+        <div style="margin-bottom: 1.5rem;">
+          <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
+        </div>
+        <div style="margin-bottom: 0.5rem; font-size: 1.8rem; text-shadow: 0 0 8px var(--amber);">
+          <span id="res-title"></span>
+        </div>
+        <div style="margin-bottom: 2rem; color: var(--amber-dim); font-size: 1.1rem;">
+          di <span id="res-author"></span> e I-Musa — <span id="res-date"></span>
+        </div>
+        <div class="story-text" id="res-text"></div>
+        <div style="margin-top: 2rem; margin-bottom: 1rem;">
+          <span style="color: var(--amber-dim);">───────────────────────────────────────</span>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button class="crt-btn" onclick="saveAndDownload()">
+            ⬇ SCARICA .TXT
+          </button>
+          <button class="crt-btn" onclick="newStory()">
+            ↻ NUOVA STORIA
+          </button>
+        </div>
+      </div>
+
+      <!-- === SCREEN 6: LIBRARY === -->
+      <div class="screen-section" id="screen-library">
+        <div style="margin-bottom: 1.5rem;">
+          <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
+        </div>
+        <div style="margin-bottom: 0.5rem; font-size: 1.8rem; text-shadow: 0 0 8px var(--amber);">
+          LIBRERIA
+        </div>
+        <div style="margin-bottom: 2rem; color: var(--amber-dim); font-size: 1.1rem;">
+          I tuoi racconti salvati in locale
+        </div>
+        <div id="library-content"></div>
+        <div style="margin-top: 2rem;">
+          <button class="crt-btn" onclick="backToIntro()">← INDIETRO</button>
+        </div>
+      </div>
+
+      <!-- === SCREEN 7: READER === -->
+      <div class="screen-section" id="screen-reader">
+        <div class="reader-header">
+          <div>
+            <div style="font-size: 1.8rem; text-shadow: 0 0 8px var(--amber);" id="reader-title"></div>
+            <div class="reader-meta" id="reader-meta"></div>
+          </div>
+          <button class="crt-btn" onclick="backToLibrary()" style="margin-top:0;">✕ CHIUDI</button>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <span style="color: var(--amber-dim);">───────────────────────────────────────</span>
+        </div>
+        <div class="story-text" id="reader-text"></div>
+        <div style="margin-top: 2rem; margin-bottom: 1rem;">
+          <span style="color: var(--amber-dim);">───────────────────────────────────────</span>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button class="crt-btn" onclick="downloadFromReader()">⬇ SCARICA .TXT</button>
+          <button class="crt-btn" onclick="backToLibrary()">← TORNA ALLA LIBRERIA</button>
+        </div>
+      </div>
+
     </div>
-
-    <!-- ═══ SCRITTURA ═══ -->
-    <div class="page" id="page-write">
-      <div style="text-align:center; margin-bottom:2rem;">
-        <div style="font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.3em;color:var(--amber);text-transform:uppercase;margin-bottom:.8rem;">Nuova sessione</div>
-        <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--off-white);">Crea la tua storia</h1>
-        <p style="color:var(--muted);font-size:.95rem;margin-top:.5rem;">I-Musa ti guiderà passo dopo passo.</p>
-      </div>
-
-      <div class="form-section">
-        <div class="form-title">1. Titolo del libro</div>
-        <div class="form-group">
-          <label>Come si intitola il tuo racconto?</label>
-          <input type="text" id="story-title" placeholder="es. L'Ultimo Treno per Napoli" maxlength="80">
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-title">2. La tua idea (max 200 parole)</div>
-        <div class="form-group">
-          <label>Descrivi la trama, i personaggi, l'ambientazione...</label>
-          <textarea id="story-prompt" placeholder="Es: Un vecchio controllore di treni scopre che ogni notte, alle 3:17, un convoglio fantasma attraversa la stazione abbandonata di Pompei..." oninput="updateCounter()"></textarea>
-          <div class="char-counter" id="word-counter">0 / 200 parole</div>
-        </div>
-      </div>
-
-      <div style="text-align:center; margin-bottom:3rem;">
-        <button class="btn btn-primary" onclick="generateStory()" id="gen-btn">
-          <span class="led"></span> Genera racconto con I-Musa
-        </button>
-      </div>
-
-      <!-- Output area -->
-      <div id="story-result" style="display:none;">
-        <div class="form-section">
-          <div class="form-title">Racconto generato</div>
-          <div class="story-meta">
-            <span id="res-title"></span>
-            <span id="res-author"></span>
-            <span id="res-date"></span>
-          </div>
-          <div class="story-output" id="story-text"></div>
-        </div>
-
-        <!-- Cover -->
-        <div class="form-section" style="text-align:center;">
-          <div class="form-title">Copertina generata</div>
-          <div class="cover-preview" id="cover-preview">
-            <div class="cover-overlay">
-              <div class="cover-title" id="cover-title"></div>
-              <div class="cover-author" id="cover-author"></div>
-            </div>
-          </div>
-          <p style="font-size:.8rem;color:var(--muted);margin-top:1rem;font-style:italic;">La copertina viene generata automaticamente dall'IA in base alla trama.</p>
-        </div>
-
-        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="saveStory()" id="btn-pubblica">✦ Pubblica</button>
-          <button class="btn btn-outline" onclick="resetStory()">↺ Nuova storia</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ LIBRERIA ═══ -->
-    <div class="page" id="page-library">
-      <div style="text-align:center; margin-bottom:2rem;">
-        <div style="font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.3em;color:var(--amber);text-transform:uppercase;margin-bottom:.8rem;">Archivio</div>
-        <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--off-white);">I tuoi libri</h1>
-        <p style="color:var(--muted);font-size:.95rem;margin-top:.5rem;">Tutte le storie create con I-Musa.</p>
-      </div>
-
-      <!-- Library is local only -->
-
-      <div class="bookshelf" id="bookshelf"></div>
-      <div id="empty-library" style="text-align:center; padding:4rem 2rem; display:none;">
-        <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--muted);font-style:italic;margin-bottom:1rem;">Nessun libro ancora.</div>
-        <button class="btn btn-outline" onclick="showPage('write')">Crea il primo racconto →</button>
-      </div>
-    </div>
-
-    <!-- ═══ READER MODAL ═══ -->
-    <div id="reader-modal" style="display:none; position:fixed; inset:0; z-index:500; background:rgba(10,10,10,.97); overflow-y:auto;">
-      <div style="max-width:720px; margin:0 auto; padding:4rem 2rem 6rem;">
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:2rem; margin-bottom:2.5rem; flex-wrap:wrap;">
-          <!-- Cover thumbnail -->
-          <div id="reader-cover" style="display:none; width:80px; height:120px; flex-shrink:0; background-size:cover; background-position:center; border:1px solid var(--border);"></div>
-          <div style="flex:1; min-width:0;">
-            <div id="reader-filename" style="font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.25em;color:var(--amber-dark);text-transform:uppercase;margin-bottom:.4rem;"></div>
-            <div id="reader-title" style="font-family:'DM Serif Display',serif;font-size:clamp(1.4rem,3vw,2rem);color:var(--off-white);line-height:1.2;"></div>
-            <div id="reader-author" style="font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.15em;color:var(--muted);margin-top:.4rem;"></div>
-          </div>
-          <button onclick="closeReader()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.15em;padding:.6rem 1rem;cursor:pointer;transition:all .2s;flex-shrink:0;" onmouseover="this.style.borderColor='var(--amber-dark)';this.style.color='var(--amber)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✕ Chiudi</button>
-        </div>
-        <div style="height:1px;background:linear-gradient(to right,transparent,rgba(212,168,67,.3),transparent);margin-bottom:2.5rem;"></div>
-        <div id="reader-body" style="font-family:'DM Serif Display',serif;font-size:1.15rem;line-height:2;color:rgba(240,237,230,.85);white-space:pre-wrap;"></div>
-        <div style="height:1px;background:linear-gradient(to right,transparent,rgba(212,168,67,.3),transparent);margin-top:3rem;"></div>
-        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
-          <button onclick="downloadCurrentBook()" class="btn btn-primary">⬇ Scarica il libro che hai scritto con I-Musa</button>
-          <button onclick="closeReader()" class="btn btn-outline">↑ Torna alla libreria</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ CONFIGURAZIONE GITHUB ═══ -->
-    
-
-  </main>
+  </div>
+  <div class="monitor-controls">
+    <div class="ctrl-btn"></div>
+    <div class="ctrl-btn"></div>
+    <div class="ctrl-btn"></div>
+  </div>
+  <div class="power-led"></div>
 </div>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-text" id="loading-text">I-Musa sta scrivendo...</div>
-  <div class="loading-bar"></div>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-
-// ═══════════════════════════════════════
 let userName = '';
 let currentStory = null;
-let currentCoverUrl = '';
+let currentReaderBook = null;
+let previousScreen = 'intro';
 
-// In-memory cache — unica fonte di verità (caricata da GitHub)
-let _booksCache = [];
-function getBooks() { return _booksCache; }
-function setBooks(d) { _booksCache = d || []; }
-function getGHConfig() {
-  try { return JSON.parse(localStorage.getItem('imusa_gh_config') || 'null'); }
-  catch(e) { return null; }
-}
-function setGHConfig(c) { localStorage.setItem('imusa_gh_config', JSON.stringify(c)); }
-
-function saveBooksToLocalStorage() {
-  localStorage.setItem('imusa_books', JSON.stringify(_booksCache));
+function showScreen(id) {
+  document.querySelectorAll('.screen-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
 }
 
-function loadBooksFromLocalStorage() {
-  try {
-    const stored = localStorage.getItem('imusa_books');
-    if (stored) {
-      _booksCache = JSON.parse(stored);
-    }
-  } catch(e) { console.warn('Errore caricamento libri locali:', e); }
+function typeText(element, text, speed = 30) {
+  return new Promise(resolve => {
+    element.textContent = '';
+    let i = 0;
+    const interval = setInterval(() => {
+      element.textContent += text.charAt(i);
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, speed);
+  });
 }
 
-// ═══════════════════════════════════════
-//  TXT HELPERS
-// ═══════════════════════════════════════
-
-function buildBookFilename(title) {
-  const slug = title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim().slice(0, 20).replace(/\s+/g, '_');
-  return `book_${Date.now()}_${slug}.txt`;
-}
-
-function buildTxtContent(story) {
-  const lines = [
-    story.title,
-    '='.repeat(Math.min(story.title.length, 60)),
-    '',
-    'Autore: ' + story.author + ' e I-Musa',
-    'Data: ' + new Date(story.date).toLocaleDateString('it-IT'),
-    '',
-    '─'.repeat(40),
-    '',
-    story.text,
-    '',
-    '─'.repeat(40),
-    'Creato con I-Musa'
-  ];
-  return lines.join('\n');
-}
-
-/** Download story as TXT (browser download) */
-function saveStoryAsTxt(story) {
-  const filename = buildBookFilename(story.title);
-  const content = buildTxtContent(story);
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  showToast('📥 Download: ' + filename, 'success');
-  return filename;
-}
-
-// ═══════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════
-async function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.getElementById('nav-' + id)?.classList.add('active');
-  if (id === 'library') {
-    loadBooksFromLocalStorage();
-    renderLibrary();
+// ── INTRO: NAME ──
+document.getElementById('input-name').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const name = this.value.trim();
+    if (!name) return;
+    userName = name;
+    showScreen('greet');
+    const greetDiv = document.getElementById('greet-content');
+    greetDiv.innerHTML = `
+      <div style="margin-bottom: 1.5rem;">
+        <span style="color: var(--amber-dim);">═══════════════════════════════════════</span>
+      </div>
+      <div style="margin-bottom: 1.5rem;" id="line1"></div>
+      <div style="margin-bottom: 1.5rem;" id="line2"></div>
+      <div style="margin-bottom: 2rem;" id="line3"></div>
+      <div style="margin-bottom: 1rem;">
+        <span style="color: var(--amber-dim);">>></span> Pronto per iniziare?
+      </div>
+      <div style="margin-top: 1rem;">
+        <button class="crt-btn" onclick="showScreen('form')">INIZIA A SCRIVERE →</button>
+      </div>
+    `;
+    setTimeout(async () => {
+      await typeText(document.getElementById('line1'), 'Piacere di conoscerti, ' + name + '.');
+      await typeText(document.getElementById('line2'), 'Ti aiuterò a scrivere una piccola storia.');
+      await typeText(document.getElementById('line3'), 'Ho già letto tutto ciò che l\'umanità ha scritto. Ora tocca a te.');
+    }, 200);
   }
-  if (id === 'config') loadGHConfigForm();
-  window.scrollTo(0, 0);
-}
+});
 
-async function refreshLibrary() {
-  loadBooksFromLocalStorage();
-  renderLibrary();
-  showToast('Libreria aggiornata', 'success');
-}
-
-// ═══════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════
-let toastTimer;
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.className = '', 3200);
-}
-
-// ═══════════════════════════════════════
-//  TERMINALE — NOME UTENTE
-// ═══════════════════════════════════════
-function submitName() {
-  const input = document.getElementById('user-name-input');
-  const name = input.value.trim();
-  if (!name) { showToast('Inserisci il tuo nome.', 'error'); return; }
-  userName = name;
-
-  const body = document.getElementById('terminal-body');
-  body.innerHTML += `
-    <span class="t-line">&nbsp;</span>
-    <span class="t-line"><span class="t-prompt">> </span><span class="t-amber">${esc(name)}</span></span>
-    <span class="t-line">&nbsp;</span>
-    <span class="t-line t-text fade-in">Piacere di conoscerti, ${esc(name)}.</span>
-    <span class="t-line t-text fade-in" style="animation-delay:.4s">Ti aiuterò a scrivere una piccola storia.</span>
-    <span class="t-line t-text fade-in" style="animation-delay:.8s">Ho già letto tutto ciò che l'umanità ha scritto. Ora tocca a te.</span>
-    <span class="t-line">&nbsp;</span>
-    <span class="t-line fade-in" style="animation-delay:1.2s"><span class="t-prompt">>> </span><span class="t-amber">Pronto?</span><span class="t-cursor"></span></span>
-    <div class="t-input-line fade-in" style="animation-delay:1.4s">
-      <button class="t-btn" onclick="startWriting()" style="margin:0 auto;">Inizia a scrivere →</button>
-    </div>
-  `;
-}
-
-function startWriting() {
-  showPage('write');
-}
-
-// ═══════════════════════════════════════
-//  WORD COUNTER
-// ═══════════════════════════════════════
-function updateCounter() {
-  const text = document.getElementById('story-prompt').value;
+// ── WORD COUNTER ──
+function updateWordCounter() {
+  const text = document.getElementById('input-prompt').value;
   const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
   const el = document.getElementById('word-counter');
   el.textContent = words + ' / 200 parole';
-  el.className = 'char-counter ' + (words > 200 ? 'warning' : 'ok');
+  el.className = 'word-counter ' + (words > 200 ? 'warning' : '');
 }
 
 // ═══════════════════════════════════════
-//  GENERATE STORY (FREE AI APIs)
+//  AI GENERATION — MULTI-PROVIDER FALLBACK
 // ═══════════════════════════════════════
 async function generateStory() {
-  const title = document.getElementById('story-title').value.trim();
-  const prompt = document.getElementById('story-prompt').value.trim();
+  const title = document.getElementById('input-title').value.trim();
+  const prompt = document.getElementById('input-prompt').value.trim();
   const wordCount = prompt.split(/\s+/).filter(w => w.length > 0).length;
 
-  if (!title) { showToast('Inserisci un titolo.', 'error'); return; }
-  if (!prompt) { showToast('Inserisci una trama.', 'error'); return; }
-  if (wordCount > 200) { showToast('La trama supera le 200 parole.', 'error'); return; }
+  if (!title) { alert('Inserisci un titolo.'); return; }
+  if (!prompt) { alert('Inserisci una trama.'); return; }
+  if (wordCount > 200) { alert('La trama supera le 200 parole.'); return; }
 
-  const loading = document.getElementById('loading-overlay');
-  const loadingText = document.getElementById('loading-text');
-  loading.classList.add('active');
+  showScreen('loading');
+  const fill = document.getElementById('loading-fill');
+  const status = document.getElementById('loading-status');
+
+  const statuses = [
+    'Analisi della trama...',
+    'Sviluppo dei personaggi...',
+    'Costruzione dell\'ambientazione...',
+    'Scrittura del racconto...',
+    'Revisione finale...'
+  ];
+
+  let progress = 0;
+  const progressInterval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress > 95) progress = 95;
+    fill.style.width = progress + '%';
+    const statusIndex = Math.min(Math.floor(progress / 20), statuses.length - 1);
+    status.textContent = statuses[statusIndex];
+  }, 400);
 
   try {
-    // ══ STORY GENERATION ══
-    loadingText.textContent = 'I-Musa sta leggendo la tua idea...';
     const storyText = await generateStoryText(title, prompt);
+    clearInterval(progressInterval);
+    fill.style.width = '100%';
 
-    // Usa cover.jpg dal repository GitHub configurato
-    // Generate AI cover image
-    const coverUrl = await generateCover(title, prompt);
-    currentCoverUrl = coverUrl;
-
-    // Store current story
     currentStory = {
-      id: 'book-' + Date.now(),
       title: title,
       author: userName || 'Anonimo',
       prompt: prompt,
       text: storyText,
-      coverUrl: coverUrl,
-      date: new Date().toISOString()
+      date: new Date().toLocaleDateString('it-IT')
     };
 
-    // Display
+    const books = JSON.parse(localStorage.getItem('imusa_books') || '[]');
+    books.unshift({ ...currentStory, id: 'book-' + Date.now() });
+    localStorage.setItem('imusa_books', JSON.stringify(books));
+
     document.getElementById('res-title').textContent = title;
-    document.getElementById('res-author').textContent = 'di ' + (userName || 'Anonimo') + ' e I-Musa';
-    document.getElementById('res-date').textContent = new Date().toLocaleDateString('it-IT');
-    document.getElementById('story-text').textContent = storyText;
-    document.getElementById('cover-title').textContent = title;
-    document.getElementById('cover-author').textContent = (userName || 'Anonimo') + ' e I-Musa';
+    document.getElementById('res-author').textContent = userName || 'Anonimo';
+    document.getElementById('res-date').textContent = currentStory.date;
+    document.getElementById('res-text').textContent = storyText;
 
-    // Set cover image
-    const coverPreview = document.getElementById('cover-preview');
-    if (coverUrl) {
-      coverPreview.style.background = `url('${coverUrl}') center/cover no-repeat`;
-    }
-
-    document.getElementById('story-result').style.display = 'block';
-    document.getElementById('story-result').scrollIntoView({ behavior: 'smooth' });
-
-    showToast('Racconto generato!', 'success');
+    setTimeout(() => {
+      showScreen('result');
+    }, 500);
 
   } catch(e) {
-    console.error(e);
-    showToast('Errore: ' + e.message, 'error');
-  } finally {
-    loading.classList.remove('active');
+    clearInterval(progressInterval);
+    console.error('Generation error:', e);
+    alert('Errore di connessione: ' + e.message + '\n\nRiprova tra qualche istante.');
+    showScreen('form');
   }
 }
 
-// ══ Generate story text using free AI APIs ══
 async function generateStoryText(title, prompt) {
-  const systemPrompt = `Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto di massimo 400 parole basato sulla trama fornita. Usa un linguaggio semplice e diretto, frasi brevi, niente parole ricercate o metafore elaborate. Racconta solo la storia, senza introduzioni né commenti.`;
-  const userPrompt = `Il titolo è: "${title}". Trama: ${prompt}.`;
+  const systemPrompt = `Sei I-Musa, un'IA che scrive racconti brevi in italiano. Scrivi un racconto completo di massimo 500 parole basato sulla trama fornita. Usa un linguaggio semplice e diretto, frasi brevi. Racconta solo la storia, senza introduzioni né commenti. Dividi il testo in paragrafi.`;
+  const userPrompt = `Titolo: "${title}". Trama: ${prompt}.`;
 
-  // ══ POLLINATIONS.AI NEW API (gen.pollinations.ai) ══
+  // ── PROVIDER 1: text.pollinations.ai (POST, no key needed) ──
   try {
-    const seed = Math.floor(Math.random() * 999999999);
-    const res = await fetch(`https://gen.pollinations.ai/text/${encodeURIComponent(userPrompt)}?model=openai&seed=${seed}&system=${encodeURIComponent(systemPrompt)}`, {
+    statusIfLoading('Connessione a text.pollinations.ai...');
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        model: 'openai',
+        seed: Math.floor(Math.random() * 999999999),
+        jsonMode: false,
+        private: true,
+        stream: false
+      })
+    });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 200) return text;
+    }
+    console.warn('text.pollinations.ai POST failed:', res.status);
+  } catch(e) { console.warn('text.pollinations.ai error:', e); }
+
+  // ── PROVIDER 2: text.pollinations.ai (GET) ──
+  try {
+    statusIfLoading('Tentativo GET su text.pollinations.ai...');
+    const fullPrompt = encodeURIComponent(systemPrompt + '\n\n' + userPrompt);
+    const res = await fetch(`https://text.pollinations.ai/${fullPrompt}?model=openai&seed=${Math.floor(Math.random()*999999999)}`, {
       method: 'GET',
       headers: { 'Accept': 'text/plain' }
     });
@@ -709,10 +750,12 @@ async function generateStoryText(title, prompt) {
       const text = await res.text();
       if (text && text.length > 200) return text;
     }
-  } catch(e) { console.warn('Pollinations GET failed:', e); }
+    console.warn('text.pollinations.ai GET failed:', res.status);
+  } catch(e) { console.warn('text.pollinations.ai GET error:', e); }
 
-  // Fallback POST to new OpenAI-compatible endpoint
+  // ── PROVIDER 3: gen.pollinations.ai (POST OpenAI-compatible) ──
   try {
+    statusIfLoading('Connessione a gen.pollinations.ai...');
     const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -727,255 +770,150 @@ async function generateStoryText(title, prompt) {
     });
     if (res.ok) {
       const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || data.text;
+      const text = data.choices?.[0]?.message?.content;
       if (text && text.length > 200) return text;
     }
-  } catch(e) { console.warn('Pollinations POST failed:', e); }
+    console.warn('gen.pollinations.ai POST failed:', res.status);
+  } catch(e) { console.warn('gen.pollinations.ai POST error:', e); }
 
-  throw new Error('I-Musa non riesce a connettersi. Riprova tra qualche istante.');
-}
-
-function generateCover(title, prompt) {
+  // ── PROVIDER 4: gen.pollinations.ai (GET) ──
   try {
-    // ══ POLLINATIONS.AI FREE IMAGE API (no key needed) ══
-    const coverPrompt = encodeURIComponent(
-      `Dark atmospheric book cover, amber and black color palette, literary fiction style, elegant, mysterious, ${prompt}, no text, no letters, cinematic lighting, high quality artwork`
-    );
-    const url = `https://image.pollinations.ai/prompt/${coverPrompt}?width=600&height=900&seed=${Date.now()}&nologo=true&model=flux&enhance=true`;
-
-    // Verify the image loads
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(url);
-      img.onerror = () => resolve('');
-      img.src = url;
-      setTimeout(() => resolve(url), 5000);
+    statusIfLoading('Tentativo GET su gen.pollinations.ai...');
+    const fullPrompt = encodeURIComponent(systemPrompt + '\n\n' + userPrompt);
+    const res = await fetch(`https://gen.pollinations.ai/text/${fullPrompt}?model=openai&seed=${Math.floor(Math.random()*999999999)}`, {
+      method: 'GET',
+      headers: { 'Accept': 'text/plain' }
     });
-  } catch(e) {
-    return '';
-  }
-}
-
-// ═══════════════════════════════════════
-//  SAVE STORY (TXT + Local only)
-// ═══════════════════════════════════════
-async function saveStory() {
-  if (!currentStory) return;
-
-  const btn = document.getElementById('btn-pubblica');
-  if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio...'; }
-
-  try {
-    // 1. Download TXT file to user's PC
-    const txtFilename = saveStoryAsTxt(currentStory);
-    currentStory.txtFilename = txtFilename;
-
-    // 2. Save to localStorage for library view
-    const books = getBooks();
-    if (!books.find(b => b.id === currentStory.id)) {
-      books.unshift(currentStory);
-      setBooks(books);
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 200) return text;
     }
-    saveBooksToLocalStorage();
+    console.warn('gen.pollinations.ai GET failed:', res.status);
+  } catch(e) { console.warn('gen.pollinations.ai GET error:', e); }
 
-    if (btn) { btn.textContent = '✓ Pubblicato'; }
-    showToast('Libro salvato in locale e scaricato ✓', 'success');
-  } catch(e) {
-    showToast('Errore: ' + e.message, 'error');
-    if (btn) { btn.disabled = false; btn.textContent = '✦ Pubblica'; }
+  throw new Error('Tutti i provider AI sono irraggiungibili. Riprova più tardi.');
+}
+
+function statusIfLoading(msg) {
+  const statusEl = document.getElementById('loading-status');
+  if (statusEl && document.getElementById('screen-loading').classList.contains('active')) {
+    statusEl.textContent = msg;
   }
 }
 
-function resetStory() {
-  document.getElementById('story-title').value = '';
-  document.getElementById('story-prompt').value = '';
+// ── DOWNLOAD ──
+function saveAndDownload() {
+  if (!currentStory) return;
+  downloadStory(currentStory);
+}
+
+function downloadStory(story) {
+  const lines = [
+    story.title,
+    '='.repeat(Math.min(story.title.length, 60)),
+    '',
+    'Autore: ' + story.author + ' e I-Musa',
+    'Data: ' + story.date,
+    '',
+    '─'.repeat(40),
+    '',
+    story.text,
+    '',
+    '─'.repeat(40),
+    'Creato con I-Musa'
+  ];
+  const content = lines.join('\n');
+  const slug = story.title.replace(/[^a-zA-Z0-9\u00C0-\u024F\s]/g, '').trim().slice(0, 20).replace(/\s+/g, '_');
+  const filename = 'imusa_' + slug + '.txt';
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function newStory() {
+  document.getElementById('input-title').value = '';
+  document.getElementById('input-prompt').value = '';
   document.getElementById('word-counter').textContent = '0 / 200 parole';
-  document.getElementById('word-counter').className = 'char-counter';
-  document.getElementById('story-result').style.display = 'none';
+  document.getElementById('word-counter').className = 'word-counter';
   currentStory = null;
-  currentCoverUrl = '';
-  const btn = document.getElementById('btn-pubblica');
-  if (btn) { btn.disabled = false; btn.textContent = '✦ Pubblica'; }
-  window.scrollTo(0, 0);
+  showScreen('form');
 }
 
 // ═══════════════════════════════════════
-//  LIBRARY RENDER — from scanned TXT files
+//  LIBRARY
 // ═══════════════════════════════════════
+function goToLibrary() {
+  previousScreen = document.querySelector('.screen-section.active')?.id.replace('screen-', '') || 'intro';
+  renderLibrary();
+  showScreen('library');
+}
+
+function backToLibrary() {
+  renderLibrary();
+  showScreen('library');
+}
+
+function backToIntro() {
+  showScreen(previousScreen === 'intro' ? 'intro' : previousScreen);
+}
+
 function renderLibrary() {
-  const shelf = document.getElementById('bookshelf');
-  const empty = document.getElementById('empty-library');
-  const localBooks = getBooks();
+  const books = JSON.parse(localStorage.getItem('imusa_books') || '[]');
+  const container = document.getElementById('library-content');
 
-  const cardActions = (onRead, onDownload) => `
-    <div style="display:flex; gap:.5rem; padding:.8rem 1rem; border-top:1px solid var(--border);">
-      <button onclick="${onRead}" class="btn btn-outline" style="flex:1;padding:.45rem .5rem;font-size:.58rem;">📖 Leggi</button>
-      <button onclick="${onDownload}" class="btn btn-outline" style="flex:1;padding:.45rem .5rem;font-size:.58rem;">⬇ Scarica</button>
-    </div>`;
-
-  if (localBooks.length === 0) {
-    shelf.innerHTML = '';
-    empty.style.display = 'block';
+  if (books.length === 0) {
+    container.innerHTML = `
+      <div class="library-empty">
+        <div style="margin-bottom: 1rem;">Nessun libro ancora.</div>
+        <button class="crt-btn" onclick="showScreen('form')">CREA IL PRIMO RACCONTO →</button>
+      </div>
+    `;
     return;
   }
-  empty.style.display = 'none';
 
-  shelf.innerHTML = localBooks.map(b => {
-    const date = new Date(b.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
-    const coverStyle = b.coverUrl
-      ? `background:url('${esc(b.coverUrl)}') center/cover no-repeat`
-      : 'background:linear-gradient(135deg,#0a0a0a 0%,#1a1510 50%,#0a0a0a 100%)';
-    return `
-      <div class="book-card">
-        <div class="book-card-cover" style="${coverStyle}">
-          ${!b.coverUrl ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem;background:linear-gradient(to top,rgba(10,10,10,.95) 0%,transparent 60%);pointer-events:none;">
-            <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--off-white);text-align:center;line-height:1.2;">${esc(b.title)}</div>
-            <div style="font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;color:var(--amber);text-align:center;margin-top:.3rem;text-transform:uppercase;">${esc(b.author)} e I-Musa</div>
-          </div>` : ''}
+  container.innerHTML = `
+    <div class="library-grid">
+      ${books.map(b => `
+        <div class="library-book" onclick="readBook('${b.id}')">
+          <div class="library-book-title">${esc(b.title)}</div>
+          <div class="library-book-author">${esc(b.author)} e I-Musa</div>
+          <div class="library-book-date">${new Date(b.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
         </div>
-        <div class="book-card-info">
-          <div class="book-card-title">${esc(b.title)}</div>
-          <div class="book-card-author">${esc(b.author)} e I-Musa</div>
-          <div class="book-card-date">${date}</div>
-        </div>
-        ${cardActions(`readBook('${b.id}')`, `downloadBookById('${b.id}')`)}
-      </div>`;
-  }).join('');
+      `).join('')}
+    </div>
+  `;
 }
 
-let currentReaderBook = null; // { title, author, text, txtFilename, coverUrl, date }
-
 function readBook(id) {
-  const book = getBooks().find(b => b.id === id);
+  const books = JSON.parse(localStorage.getItem('imusa_books') || '[]');
+  const book = books.find(b => b.id === id);
   if (!book) return;
   currentReaderBook = book;
 
   const date = new Date(book.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
-  document.getElementById('reader-filename').textContent = book.txtFilename || ('book_' + book.id + '.txt');
   document.getElementById('reader-title').textContent = book.title;
-  document.getElementById('reader-author').textContent = book.author + ' e I-Musa  ·  ' + date;
-  document.getElementById('reader-body').textContent = book.text;
+  document.getElementById('reader-meta').textContent = book.author + ' e I-Musa  ·  ' + date;
+  document.getElementById('reader-text').textContent = book.text;
 
-  const readerCover = document.getElementById('reader-cover');
-  if (book.coverUrl) {
-    readerCover.style.backgroundImage = `url('${book.coverUrl}')`;
-    readerCover.style.display = 'block';
-  } else {
-    readerCover.style.display = 'none';
-  }
-
-  document.getElementById('reader-modal').style.display = 'block';
-  document.body.style.overflow = 'hidden';
-  document.getElementById('reader-modal').scrollTop = 0;
+  showScreen('reader');
 }
 
-function downloadCurrentBook() {
+function downloadFromReader() {
   if (!currentReaderBook) return;
-  const content = currentReaderBook.text || buildTxtContent(currentReaderBook);
-  const filename = currentReaderBook.txtFilename || (currentReaderBook.title.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30) + '.txt');
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  showToast('Download: ' + filename, 'success');
+  downloadStory(currentReaderBook);
 }
 
-function downloadBookById(id) {
-  const book = getBooks().find(b => b.id === id);
-  if (!book) return;
-  const content = buildTxtContent(book);
-  const filename = book.txtFilename || ('book_' + book.title.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 20) + '.txt');
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  showToast('Download: ' + filename, 'success');
-}
-
-function closeReader() {
-  document.getElementById('reader-modal').style.display = 'none';
-  document.body.style.overflow = '';
-  currentReaderBook = null;
-}
-
-// ═══════════════════════════════════════
-// ═══════════════════════════════════════
-function saveGHConfig() {
-  const config = {
-    owner: document.getElementById('gh-owner').value.trim(),
-    repo: document.getElementById('gh-repo').value.trim(),
-    branch: document.getElementById('gh-branch').value.trim() || 'main',
-    token: document.getElementById('gh-token').value.trim()
-  };
-  if (!config.owner || !config.repo || !config.token) {
-    showToast('Compila tutti i campi.', 'error'); return;
-  }
-  setGHConfig(config);
-  showToast('Configurazione salvata!', 'success');
-}
-
-function loadGHConfigForm() {
-  const c = getGHConfig();
-  if (c) {
-    document.getElementById('gh-owner').value = c.owner || '';
-    document.getElementById('gh-repo').value = c.repo || '';
-    document.getElementById('gh-branch').value = c.branch || 'main';
-    document.getElementById('gh-token').value = c.token || '';
-  }
-}
-
-/* GitHub sync removed — books are saved locally only */
-
-// ═══════════════════════════════════════
-//  EXPORT / IMPORT
-// ═══════════════════════════════════════
-function exportBooks() {
-  const data = { books: getBooks(), exportDate: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'imusa-libri-' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-  showToast('Backup esportato!', 'success');
-}
-
-function importBooks(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.books) {
-        setBooks(data.books);
-        showToast('Libreria importata!', 'success');
-        renderLibrary();
-      }
-    } catch(err) { showToast('File non valido.', 'error'); }
-  };
-  reader.readAsText(file);
-}
-
-// ═══════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════
 function esc(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ═══════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════
-
-// ═══════════════════════════════════════
-//  LOAD BOOKS FROM LOCAL STORAGE
-// ═══════════════════════════════════════
-// Books are stored locally in the browser, no GitHub sync
-
-(async function init() {
-  loadBooksFromLocalStorage();
-})();
+// ── FOCUS ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('input-name').focus();
+});
 </script>
 
 </body>
