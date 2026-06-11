@@ -63,7 +63,7 @@
 </head>
 <body>
 <div class="crt-monitor">
-  <div class="crt-brand">I-Musa Terminal v4.0 — Zero Peso Edition</div>
+  <div class="crt-brand">I-Musa Terminal v4.1 — Hugging Face Router</div>
   <div class="crt-screen">
     <div class="crt-vignette"></div>
     <div class="screen-content">
@@ -102,7 +102,7 @@
 
         <div style="margin-bottom:1.5rem;margin-top:1.5rem"><span class="sep">[3/3]</span> MODELLO AI</div>
         <div style="margin-bottom:0.5rem;color:var(--amber-dim);font-size:1.2rem">
-          <span class="sep">[</span> Qwen2.5-7B-Instruct (Hugging Face) <span class="sep">]</span> — Narrativa italiana avanzata
+          <span class="sep">[</span> Qwen2.5-7B-Instruct (Hugging Face Router) <span class="sep">]</span> — Narrativa italiana avanzata
         </div>
         <div style="margin-top:2rem">
           <button class="crt-btn" id="btn-generate" onclick="generateNovel()">
@@ -148,7 +148,9 @@ let userName = '';
 let currentNovel = null;
 
 const HF_API_KEY = "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";
-const HF_API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct";
+const HF_API_URL = "https://router.huggingface.co/v1/chat/completions";
+const HF_MODEL = "Qwen/Qwen2.5-7B-Instruct";
+
 const SYSTEM_PROMPT = "Sei I-Musa, un'intelligenza artificiale narratrice di rara sensibilita letteraria. Scrivi un racconto breve in italiano (tra 400 e 600 parole) basandoti ESCLUSIVAMENTE sul titolo e sul prompt forniti dall'utente. Non ignorare alcun dettaglio del prompt: personaggi, luoghi, atmosfera, tono - tutto deve riflettersi nella storia. Usa una prosa curata, con ritmo e immagini precise. Suddividi il testo in paragrafi. Non usare markdown, asterischi, titoli o numerazioni. Solo prosa narrativa pura.";
 
 function showScreen(id) {
@@ -212,19 +214,21 @@ async function generateNovel() {
   const status = document.getElementById('loading-status');
 
   fill.style.width = '15%';
-  status.textContent = 'Connessione a Hugging Face...';
+  status.textContent = 'Connessione a Hugging Face Router...';
 
   try {
     const userMessage = 'Titolo: "' + title + '"\n\nPrompt: ' + prompt;
 
     const payload = {
-      inputs: "<|im_start|>system\n" + SYSTEM_PROMPT + "<|im_end|>\n<|im_start|>user\n" + userMessage + "<|im_end|>\n<|im_start|>assistant\n",
-      parameters: {
-        max_new_tokens: 800,
-        temperature: 0.8,
-        top_p: 0.9,
-        return_full_text: false
-      }
+      model: HF_MODEL,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userMessage }
+      ],
+      max_tokens: 800,
+      temperature: 0.8,
+      top_p: 0.9,
+      stream: false
     };
 
     fill.style.width = '40%';
@@ -241,13 +245,16 @@ async function generateNovel() {
 
     if (!res.ok) {
       const errData = await res.json().catch(function() { return {}; });
-      const errMsg = (errData.error && errData.error.message) || ('HTTP ' + res.status);
+      const errMsg = (errData.error && errData.error.message) || (errData.message) || ('HTTP ' + res.status);
 
       if (res.status === 401 || res.status === 403) {
-        throw new Error('API Key non valida. Verifica su huggingface.co/settings/tokens');
+        throw new Error('API Key non valida o scaduta.');
       }
-      if (res.status === 503) {
-        throw new Error('Modello in caricamento su Hugging Face. Riprova tra 30 secondi.');
+      if (res.status === 429) {
+        throw new Error('Rate limit superato. Riprova tra qualche minuto.');
+      }
+      if (res.status === 503 || res.status === 504) {
+        throw new Error('Server Hugging Face sovraccarico. Riprova tra 30 secondi.');
       }
       throw new Error(errMsg);
     }
@@ -255,15 +262,13 @@ async function generateNovel() {
     const data = await res.json();
     let text = '';
 
-    if (Array.isArray(data) && data[0] && data[0].generated_text) {
-      text = data[0].generated_text;
-    } else if (data.generated_text) {
-      text = data.generated_text;
+    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+      text = data.choices[0].message.content;
     } else {
       throw new Error('Risposta inattesa dal server');
     }
 
-    text = text.replace(/<\|im_start\|>assistant\n/, '').replace(/<\|im_end\|>/, '').trim();
+    text = text.trim();
 
     if (!text || text.length < 80) {
       throw new Error('Risposta troppo breve');
@@ -271,7 +276,7 @@ async function generateNovel() {
 
     fill.style.width = '100%';
     currentNovel = { title: title, author: userName || 'Anonimo', text: text, date: new Date().toLocaleDateString('it-IT') };
-    displayNovel(text, 'HF');
+    displayNovel(text);
     setTimeout(function() { showScreen('result'); }, 500);
 
   } catch(e) {
@@ -281,12 +286,12 @@ async function generateNovel() {
 
     setTimeout(function() {
       showScreen('form');
-      alert('Errore: ' + e.message + '\n\nSe il modello e in caricamento, riprova tra 30-60 secondi.');
+      alert('Errore: ' + e.message + '\n\nSe il server e sovraccarico, riprova tra 30-60 secondi.\nSe la key non funziona, verifica su huggingface.co/settings/tokens');
     }, 1500);
   }
 }
 
-function displayNovel(text, mode) {
+function displayNovel(text) {
   const paragraphs = text.split(/\n\n|\n/).filter(function(p) { return p.trim().length > 0; });
   let html = '';
   paragraphs.forEach(function(para) {
@@ -299,7 +304,7 @@ function displayNovel(text, mode) {
   document.getElementById('res-author').textContent = currentNovel.author;
   document.getElementById('res-date').textContent = currentNovel.date;
   document.getElementById('res-text').innerHTML = html;
-  document.getElementById('res-status').textContent = '[Qwen2.5-7B (Hugging Face)] ' + wordCount + ' parole — Zero peso sul dispositivo';
+  document.getElementById('res-status').textContent = '[Qwen2.5-7B (HF Router)] ' + wordCount + ' parole — Zero peso sul dispositivo';
 }
 
 function escapeHtml(text) {
