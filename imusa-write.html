@@ -135,89 +135,88 @@
 let userName = '';
 let currentNovel = null;
 
-// Banca dati di frammenti narrativi per il generatore locale
 const storyFragments = {
   openings: [
     "Era un {weather} {time} quando {protagonist} {action} per la prima volta.",
     "Nessuno avrebbe mai immaginato che {event} avrebbe cambiato tutto.",
-    "La {place} taceva da secoli, finché {protagonist} non {action}.",
-    "Quando {protagonist} ricevette {object}, capì che nulla sarebbe stato più come prima.",
-    "Il {time} di {season} portava con sé un presagio che {protagonist} avrebbe compreso solo molto più tardi.",
+    "La {place} taceva da secoli, finche {protagonist} non {action}.",
+    "Quando {protagonist} ricevette {object}, capi che nulla sarebbe stato piu come prima.",
+    "Il {time} di {season} portava con se un presagio che {protagonist} avrebbe compreso solo molto piu tardi.",
     "{protagonist} non sapeva ancora che {event} stava per cambiare il corso della sua esistenza.",
     "Nella {place}, sotto un cielo {weather}, {protagonist} {action} con il cuore in gola.",
-    "Tutto cominciò quando {protagonist} decise di {action}, quel {time} lontano.",
+    "Tutto comincio quando {protagonist} decise di {action}, quel {time} lontano.",
     "La leggenda narra che in {place}, durante un {weather} {time}, {event} prese forma.",
     "{protagonist} aveva atteso a lungo quel momento. Finalmente, {action}.",
     "Una {object} misteriosa, trovata in {place}, avrebbe rivelato segreti sepolti da tempo.",
     "Il silenzio di {place} fu rotto da {event}, e {protagonist} fu il primo a sentirlo.",
-    "Non era un {time} come gli altri. {protagonist} lo capì non appena {action}.",
-    "Tra le {place_adj} strade di {place}, {protagonist} scoprì qualcosa che non avrebbe mai dovuto vedere.",
-    "{protagonist} si svegliò in un {weather} {time}, con il ricordo di {event} ancora vivido nella mente."
+    "Non era un {time} come gli altri. {protagonist} lo capi non appena {action}.",
+    "Tra le {place_adj} strade di {place}, {protagonist} scopri qualcosa che non avrebbe mai dovuto vedere.",
+    "{protagonist} si sveglio in un {weather} {time}, con il ricordo di {event} ancora vivido nella mente."
   ],
   developments: [
-    "{protagonist} {emotion} mentre {situation} si faceva sempre più {intensity}.",
-    "Tra le {place_adj} vie di {place}, {protagonist} scoprì {discovery} che nessuno conosceva.",
+    "{protagonist} {emotion} mentre {situation} si faceva sempre piu {intensity}.",
+    "Tra le {place_adj} vie di {place}, {protagonist} scopri {discovery} che nessuno conosceva.",
     "Il {antagonist} osservava dall'ombra, {antagonist_action} con {emotion_adj} determinazione.",
-    "Ogni {time_unit} che passava, {situation} diventava più {intensity}, e {protagonist} sapeva di dover {action}.",
-    "La verità, nascosta dietro {object}, era più {intensity} di quanto chiunque potesse immaginare.",
-    "{protagonist} si trovò di fronte a una scelta: {action} o lasciare che {situation} prendesse il sopravvento.",
-    "In un angolo remoto di {place}, {protagonist} trovò {object}, e con esso {discovery}.",
+    "Ogni {time_unit} che passava, {situation} diventava piu {intensity}, e {protagonist} sapeva di dover {action}.",
+    "La verita, nascosta dietro {object}, era piu {intensity} di quanto chiunque potesse immaginare.",
+    "{protagonist} si trovo di fronte a una scelta: {action} o lasciare che {situation} prendesse il sopravvento.",
+    "In un angolo remoto di {place}, {protagonist} trovo {object}, e con esso {discovery}.",
     "Il {antagonist} si avvicinava. {protagonist} poteva sentirlo, come un {weather} che si avvicina all'orizzonte.",
-    "{emotion}, {protagonist} capì che {revelation} era solo la punta dell'iceberg.",
-    "La {place} sembrava respirare. Ogni pietra, ogni ombra raccontava di {event}.",
-    "{protagonist} cercò di {action}, ma {situation} lo avvolse come una nebbia {intensity}.",
-    "Un incontro con {antagonist} cambiò tutto. {protagonist} {emotion}, ma non si arrese.",
-    "La ricerca di {object} portò {protagonist} nei luoghi più {place_adj} di {place}.",
-    "{discovery} rivelò una verità che {protagonist} non era pronto ad accettare.",
+    "{emotion}, {protagonist} capi che {revelation} era solo la punta dell'iceberg.",
+    "La {place} sembrava respirare. Ogni pietra, ombra raccontava di {event}.",
+    "{protagonist} cerco di {action}, ma {situation} lo avvolse come una nebbia {intensity}.",
+    "Un incontro con {antagonist} cambio tutto. {protagonist} {emotion}, ma non si arrese.",
+    "La ricerca di {object} porto {protagonist} nei luoghi piu {place_adj} di {place}.",
+    "{discovery} rivelo una verita che {protagonist} non era pronto ad accettare.",
     "Mentre {weather} infuriava fuori, dentro {place} {situation} prendeva forma in modo {intensity}."
   ],
   climaxes: [
-    "Fu in quel preciso istante, mentre {weather} {action} fuori, che {protagonist} capì: {revelation}.",
-    "La {place} tremò. Non fisicamente, ma nello spirito di chi l'abitava. {protagonist} {action} con tutta la forza che gli restava.",
-    "Il confronto con {antagonist} era inevitabile. {protagonist} {emotion}, ma non arretrò di un passo.",
-    "Quando {object} rivelò il suo segreto, il mondo di {protagonist} si capovolse per sempre.",
+    "Fu in quel preciso istante, mentre {weather} {action} fuori, che {protagonist} capi: {revelation}.",
+    "La {place} tremo. Non fisicamente, ma nello spirito di chi l'abitava. {protagonist} {action} con tutta la forza che gli restava.",
+    "Il confronto con {antagonist} era inevitabile. {protagonist} {emotion}, ma non arretro di un passo.",
+    "Quando {object} rivelo il suo segreto, il mondo di {protagonist} si capovolse per sempre.",
     "Nessuno avrebbe potuto prevedere che {event} sarebbe stato il catalizzatore di tutto.",
-    "{protagonist} {action}, e in quel gesto si condensò tutto il significato della sua {time}.",
-    "La verità esplose come un {weather} in una notte serena: {revelation}.",
-    "In un attimo che durò un'eternità, {protagonist} e {antagonist} si guardarono. {emotion}.",
-    "{object} brillò, e {place} risplendé di una luce che non si vedeva da {time_unit}.",
-    "{protagonist} capì che {action} era l'unica via. {revelation}, non importava il prezzo.",
+    "{protagonist} {action}, e in quel gesto si condenso tutto il significato della sua {time}.",
+    "La verita esplose come un {weather} in una notte serena: {revelation}.",
+    "In un attimo che duro un'eternita, {protagonist} e {antagonist} si guardarono. {emotion}.",
+    "{object} brillo, e {place} risplende di una luce che non si vedeva da {time_unit}.",
+    "{protagonist} capi che {action} era l'unica via. {revelation}, non importava il prezzo.",
     "L'aria di {place} si fece densa. {event} stava per compiersi, e {protagonist} era al centro.",
-    "Con un ultimo sforzo, {protagonist} {action}. {revelation} lo colpì come un fulmine.",
-    "Il {antagonist} cadde, ma non prima di aver svelato {discovery} che cambiò tutto.",
+    "Con un ultimo sforzo, {protagonist} {action}. {revelation} lo colpi come un fulmine.",
+    "Il {antagonist} cadde, ma non prima di aver svelato {discovery} che cambio tutto.",
     "{weather} e {emotion} si mescolarono in un crescendo che {place} non avrebbe mai dimenticato.",
-    "In quel {time_unit}, {protagonist} capì che {revelation} era la chiave di tutto."
+    "In quel {time_unit}, {protagonist} capi che {revelation} era la chiave di tutto."
   ],
   endings: [
-    "E così, {protagonist} {final_action}, lasciando dietro di sé {place} e tutto ciò che rappresentava. Ma {object} rimase, silenzioso testimone di una storia che nessuno avrebbe mai dimenticato.",
-    "La {place} tornò alla sua quiete, ma qualcosa era cambiato per sempre. {protagonist} se ne andò, portando con sé {object} e il ricordo di {event}.",
-    "Forse non era la fine che {protagonist} sperava, ma era la fine di cui aveva bisogno. E a volte, quella è la storia più vera di tutte.",
-    "Quando l'ultimo {time_unit} di quella {season} trascorse, {protagonist} guardò {place} per l'ultima volta. {revelation} era diventata parte di lui, come un marchio invisibile.",
+    "E cosi, {protagonist} {final_action}, lasciando dietro di se {place} e tutto cio che rappresentava. Ma {object} rimase, silenzioso testimone di una storia che nessuno avrebbe mai dimenticato.",
+    "La {place} torno alla sua quiete, ma qualcosa era cambiato per sempre. {protagonist} se ne ando, portando con se {object} e il ricordo di {event}.",
+    "Forse non era la fine che {protagonist} sperava, ma era la fine di cui aveva bisogno. E a volte, quella e la storia piu vera di tutte.",
+    "Quando l'ultimo {time_unit} di quella {season} trascorse, {protagonist} guardo {place} per l'ultima volta. {revelation} era diventata parte di lui, come un marchio invisibile.",
     "La storia di {protagonist} e {place} non finisce qui. Ma ogni racconto, prima o poi, deve trovare il suo {time_unit} di riposo. E questo era il suo.",
-    "{protagonist} {final_action}, e {place} lo lasciò andare. Ma {object} rimase, custode di un segreto che il tempo avrebbe lentamente dimenticato.",
+    "{protagonist} {final_action}, e {place} lo lascio andare. Ma {object} rimase, custode di un segreto che il tempo avrebbe lentamente dimenticato.",
     "Era finita. {event} era ormai un ricordo, e {protagonist} un nome che pochi ancora pronunciavano. Ma {place} ricordava.",
-    "Con {object} stretto al petto, {protagonist} {final_action}. {revelation} lo accompagnò, silenziosa compagna di viaggio.",
-    "La {place} si risvegliò a un nuovo {time}, diverso ma non meno vero. {protagonist} aveva fatto la sua parte.",
-    "E così, in un {weather} {time}, {protagonist} chiuse il cerchio. {final_action}, consapevole che {revelation} era solo l'inizio.",
+    "Con {object} stretto al petto, {protagonist} {final_action}. {revelation} lo accompagno, silenziosa compagna di viaggio.",
+    "La {place} si risveglio a un nuovo {time}, diverso ma non meno vero. {protagonist} aveva fatto la sua parte.",
+    "E cosi, in un {weather} {time}, {protagonist} chiuse il cerchio. {final_action}, consapevole che {revelation} era solo l'inizio.",
     "Forse {protagonist} avrebbe trovato pace, un giorno. Ma per ora, {final_action} era sufficiente.",
-    "Il {antagonist} era sconfitto, ma {place} portava ancora le cicatrici di {event}. {protagonist} lo sapeva, e accettò il peso.",
-    "{object} tornò dove apparteneva, e {protagonist} {final_action}. La storia, però, non finisce mai davvero.",
+    "Il {antagonist} era sconfitto, ma {place} portava ancora le cicatrici di {event}. {protagonist} lo sapeva, e accetto il peso.",
+    "{object} torno dove apparteneva, e {protagonist} {final_action}. La storia, pero, non finisce mai davvero.",
     "In lontananza, {place} brillava sotto un cielo {weather}. {protagonist} sorrise. {revelation} era stata valsa la pena.",
-    "E così termina il racconto di {protagonist}. Ma ascolta: nelle {place_adj} notti di {place}, qualcuno dice ancora di sentire {event}."
+    "E cosi termina il racconto di {protagonist}. Ma ascolta: nelle {place_adj} notti di {place}, qualcuno dice ancora di sentire {event}."
   ],
 
   weather: ["giorno piovoso", "sera nebbiosa", "mattino luminoso", "notte tempestosa", "crepuscolo dorato", "alba fredda", "pomeriggio di sole", "notte stellata", "giorno di neve", "sera di vento"],
   time: ["autunno", "primavera", "inverno", "estate", "maggio", "ottobre", "novembre", "mattino", "sera", "mezzanotte", "alba", "tramonto", "gennaio", "giugno"],
   season: ["quell'autunno", "quella primavera", "quell'inverno", "quell'estate", "quell'anno", "quella stagione", "quel periodo", "quel tempo"],
   time_unit: ["giorno", "mese", "anno", "istante", "momento", "ora", "secolo", "decennio", "tempo"],
-  emotion: ["tremò", "sorrise amaramente", "sospirò", "strinse i pugni", "chiuse gli occhi", "alzò lo sguardo", "sbiancò", "rise", "pianse", "si fermò", "sussurrò"],
+  emotion: ["tremo", "sorrise amaramente", "sospiro", "strinse i pugni", "chiuse gli occhi", "alzo lo sguardo", "sbianco", "rise", "pianse", "si fermo", "sussurro"],
   emotion_adj: ["fredda", "ardente", "silenziosa", "disperata", "ferma", "tremante", "implacabile", "dolce", "crudele", "luminosa"],
   intensity: ["opprimente", "irreale", "incalzante", "misteriosa", "inevitabile", "crescente", "palpitante", "inquietante", "magnetica", "fragile"],
-  action: ["attraversò la soglia", "aprì la lettera", "guardò fuori dalla finestra", "prese in mano l'oggetto", "fece il primo passo", "decise di restare", "scelse di partire", "alzò la voce", "si voltò", "toccò il muro", "si inginocchiò", "sorrise"],
-  final_action: ["se ne andò", "restò", "sorrise per l'ultima volta", "alzò lo sguardo verso il cielo", "chiuse il libro della sua vita lì", "decise di ricominciare", "prese la strada del ritorno", "si allontanò", "rimase in silenzio", "accolse il futuro"],
+  action: ["attraverso la soglia", "apri la lettera", "guardo fuori dalla finestra", "prese in mano l'oggetto", "fece il primo passo", "decise di restare", "scelse di partire", "alzo la voce", "si volto", "tocco il muro", "si inginocchio", "sorrise"],
+  final_action: ["se ne ando", "resto", "sorrise per l'ultima volta", "alzo lo sguardo verso il cielo", "chiuse il libro della sua vita li", "decise di ricominciare", "prese la strada del ritorno", "si allontano", "rimase in silenzio", "accolse il futuro"],
   antagonist_action: ["aspettando il momento giusto", "pianificando ogni mossa", "sorridendo con malizia", "osservando ogni passo", "tramando nell'ombra", "raccogliendo informazioni", "preparando la trappola", "meditando vendetta"],
-  discovery: ["un segreto sepolto", "una verità dimenticata", "un passato che non conosceva", "un legame invisibile", "una porta chiusa da troppo tempo", "un messaggio antico", "un mistero familiare", "una rivelazione inaspettata", "un tesoro nascosto", "un'eredità oscura"],
-  revelation: ["la verità non libera, ma condanna", "alcune storie non cercano eroi, solo testimoni", "il passato non muore mai, dorme solo", "ogni fine è un inizio mascherato", "l'amore e la paura sono la stessa faccia della medaglia", "la libertà ha un prezzo che pochi sono disposti a pagare", "il destino si scrive nelle scelte, non nelle stelle", "nessuno è davvero solo finché ha un ricordo", "la vera forza è nel lasciar andare", "il tempo guarisce tutto, ma non dimentica nulla"],
+  discovery: ["un segreto sepolto", "una verita dimenticata", "un passato che non conosceva", "un legame invisibile", "una porta chiusa da troppo tempo", "un messaggio antico", "un mistero familiare", "una rivelazione inaspettata", "un tesoro nascosto", "un'eredit oscura"],
+  revelation: ["la verita non libera, ma condanna", "alcune storie non cercano eroi, solo testimoni", "il passato non muore mai, dorme solo", "ogni fine e un inizio mascherato", "l'amore e la paura sono la stessa faccia della medaglia", "la liberta ha un prezzo che pochi sono disposti a pagare", "il destino si scrive nelle scelte, non nelle stelle", "nessuno e davvero solo finche ha un ricordo", "la vera forza e nel lasciar andare", "il tempo guarisce tutto, ma non dimentica nulla"],
   place_adj: ["silenziosi", "antichi", "deserti", "famosi", "dimenticati", "misteriosi", "angusti", "vasti", "oscuri", "dorati", "freddi", "caldi"]
 };
 
@@ -226,30 +225,23 @@ function getRandom(arr) {
 }
 
 function generateLocalStory(title, prompt) {
-  // Estrai parole chiave dal prompt
-  const words = prompt.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const words = prompt.toLowerCase().split(/[\s,.;:!?]+/).filter(w => w.length > 3);
 
-  // Estrai possibili nomi (parole capitalizzate nel prompt)
   const possibleNames = prompt.match(/[A-Z][a-z]+/g) || [];
   const protagonist = possibleNames[0] || "il protagonista";
   const antagonist = possibleNames[1] || "l'antagonista";
 
-  // Estrai luoghi (parole dopo preposizioni)
   const placeMatches = prompt.match(/(?:in|a|presso|vicino a|nel|nella|nello)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi) || [];
-  const place = placeMatches[0]?.replace(/^(in|a|presso|vicino a|nel|nella|nello)\s+/i, '') || "il luogo";
+  const place = placeMatches[0] ? placeMatches[0].replace(/^(in|a|presso|vicino a|nel|nella|nello)\s+/i, '') : "il luogo";
 
-  // Estrai oggetti (parole dopo "un", "una", "il", "la")
   const objectMatches = prompt.match(/(?:un|una|il|la|lo)\s+([a-z]+\s+[a-z]+|[a-z]{4,})/gi) || [];
-  const object = objectMatches[0]?.replace(/^(un|una|il|la|lo)\s+/i, '') || "l'oggetto misterioso";
+  const object = objectMatches[0] ? objectMatches[0].replace(/^(un|una|il|la|lo)\s+/i, '') : "l'oggetto misterioso";
 
-  // Estrai eventi (frasi dopo "quando", "dopo", "durante")
   const eventMatches = prompt.match(/(?:quando|dopo|durante|per)\s+([^,.]+)/gi) || [];
-  const event = eventMatches[0]?.replace(/^(quando|dopo|durante|per)\s+/i, '') || "l'incontro";
+  const event = eventMatches[0] ? eventMatches[0].replace(/^(quando|dopo|durante|per)\s+/i, '') : "l'incontro";
 
-  // Estrai situazione (prime parole significative del prompt)
   const situation = words.slice(0, 3).join(' ') || "la situazione";
 
-  // Costruisci la storia con varietà
   const opening = getRandom(storyFragments.openings)
     .replace(/{weather}/g, getRandom(storyFragments.weather))
     .replace(/{time}/g, getRandom(storyFragments.time))
@@ -308,7 +300,7 @@ function generateLocalStory(title, prompt) {
     .replace(/{emotion_adj}/g, getRandom(storyFragments.emotion_adj))
     .replace(/{time_unit}/g, getRandom(storyFragments.time_unit))
     .replace(/{action}/g, getRandom(storyFragments.action))
-    .replace(/{object}/g, "la verità nascosta")
+    .replace(/{object}/g, "la verita nascosta")
     .replace(/{revelation}/g, getRandom(storyFragments.revelation))
     .replace(/{weather}/g, getRandom(storyFragments.weather));
 
@@ -339,34 +331,22 @@ function generateLocalStory(title, prompt) {
     .replace(/{antagonist}/g, antagonist)
     .replace(/{place_adj}/g, getRandom(storyFragments.place_adj));
 
-  // Assembla con il titolo come apertura
-  const story = `${title}
-
-${opening}
-
-${dev1}
-
-${dev2}
-
-${dev3}
-
-${climax}
-
-${ending}`;
+  const story = title + "\n\n" + opening + "\n\n" + dev1 + "\n\n" + dev2 + "\n\n" + dev3 + "\n\n" + climax + "\n\n" + ending;
 
   return story;
 }
 
 function showScreen(id) {
-  document.querySelectorAll('.screen-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen-section').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('screen-' + id).classList.add('active');
 }
 
-function typeText(el, text, speed = 30) {
-  return new Promise(resolve => {
+function typeText(el, text, speed) {
+  speed = speed || 30;
+  return new Promise(function(resolve) {
     el.textContent = '';
     let i = 0;
-    const iv = setInterval(() => {
+    const iv = setInterval(function() {
       el.textContent += text.charAt(i++);
       if (i >= text.length) { clearInterval(iv); resolve(); }
     }, speed);
@@ -379,24 +359,26 @@ document.getElementById('input-name').addEventListener('keydown', function(e) {
   if (!name) return;
   userName = name;
   showScreen('greet');
-  document.getElementById('greet-content').innerHTML = `
-    <div style="margin-bottom:1.5rem"><span class="sep">═══════════════════════════════════════</span></div>
-    <div style="margin-bottom:1.5rem" id="line1"></div>
-    <div style="margin-bottom:1.5rem" id="line2"></div>
-    <div style="margin-bottom:2rem" id="line3"></div>
-    <div style="margin-bottom:1rem"><span class="sep">>></span> Pronto per iniziare?</div>
-    <div style="margin-top:1rem"><button class="crt-btn" onclick="showScreen('form')">INIZIA A SCRIVERE →</button></div>
-  `;
-  setTimeout(async () => {
-    await typeText(document.getElementById('line1'), 'Piacere di conoscerti, ' + name + '.');
-    await typeText(document.getElementById('line2'), 'Ti aiuterò a scrivere un breve romanzo.');
-    await typeText(document.getElementById('line3'), 'Scrivi titolo e trama, io genero la storia. Tutto nel tuo browser, nessun server.');
+  document.getElementById('greet-content').innerHTML = 
+    '<div style="margin-bottom:1.5rem"><span class="sep">═══════════════════════════════════════</span></div>' +
+    '<div style="margin-bottom:1.5rem" id="line1"></div>' +
+    '<div style="margin-bottom:1.5rem" id="line2"></div>' +
+    '<div style="margin-bottom:2rem" id="line3"></div>' +
+    '<div style="margin-bottom:1rem"><span class="sep">>></span> Pronto per iniziare?</div>' +
+    '<div style="margin-top:1rem"><button class="crt-btn" onclick="showScreen(\'form\')">INIZIA A SCRIVERE →</button></div>';
+
+  setTimeout(function() {
+    typeText(document.getElementById('line1'), 'Piacere di conoscerti, ' + name + '.').then(function() {
+      return typeText(document.getElementById('line2'), 'Ti aiutero a scrivere un breve romanzo.');
+    }).then(function() {
+      return typeText(document.getElementById('line3'), 'Scrivi titolo e trama, io genero la storia. Tutto nel tuo browser, nessun server.');
+    });
   }, 200);
 });
 
 function updateWordCounter() {
   const text = document.getElementById('input-prompt').value;
-  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+  const words = text.trim().split(/[\s,.;:!?]+/).filter(function(w) { return w.length > 0; }).length;
   const el = document.getElementById('word-counter');
   el.textContent = words + ' / 200 parole';
   el.className = 'word-counter' + (words > 200 ? ' warning' : '');
@@ -408,29 +390,28 @@ async function generateNovel() {
 
   if (!title) { alert('Inserisci un titolo.'); return; }
   if (!prompt) { alert('Inserisci un prompt.'); return; }
-  if (prompt.split(/\s+/).filter(w => w.length > 0).length > 200) { alert('Il prompt supera le 200 parole.'); return; }
+  if (prompt.split(/[\s,.;:!?]+/).filter(function(w) { return w.length > 0; }).length > 200) { alert('Il prompt supera le 200 parole.'); return; }
 
   showScreen('loading');
   const fill = document.getElementById('loading-fill');
   const status = document.getElementById('loading-status');
   const statuses = ["Analisi del prompt...","Sviluppo dei personaggi...","Costruzione dell'ambientazione...","Scrittura del romanzo...","Revisione finale..."];
   let progress = 0;
-  const iv = setInterval(() => {
+  const iv = setInterval(function() {
     progress = Math.min(progress + Math.random() * 15, 95);
     fill.style.width = progress + '%';
     status.textContent = statuses[Math.min(Math.floor(progress / 20), statuses.length - 1)];
   }, 400);
 
   try {
-    // Simula un ritardo per l'effetto "scrittura"
-    await new Promise(r => setTimeout(r, 2500 + Math.random() * 1500));
+    await new Promise(function(r) { setTimeout(r, 2500 + Math.random() * 1500); });
     const text = generateLocalStory(title, prompt);
 
     clearInterval(iv);
     fill.style.width = '100%';
-    currentNovel = { title, author: userName || 'Anonimo', text, date: new Date().toLocaleDateString('it-IT') };
+    currentNovel = { title: title, author: userName || 'Anonimo', text: text, date: new Date().toLocaleDateString('it-IT') };
     displayNovel(text);
-    setTimeout(() => showScreen('result'), 500);
+    setTimeout(function() { showScreen('result'); }, 500);
   } catch(e) {
     clearInterval(iv);
     console.error('Errore:', e);
@@ -440,17 +421,14 @@ async function generateNovel() {
 }
 
 function displayNovel(text) {
-  const paragraphs = text.split(/
-
-|
-/).filter(p => p.trim().length > 0);
+  const paragraphs = text.split(/\n\n|\n/).filter(function(p) { return p.trim().length > 0; });
   let html = '';
-  paragraphs.forEach(para => {
+  paragraphs.forEach(function(para) {
     let clean = para.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '').trim();
     if (clean.length > 0) html += '<p>' + escapeHtml(clean) + '</p>';
   });
 
-  const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
+  const wordCount = text.split(/[\s,.;:!?]+/).filter(function(w) { return w.length > 0; }).length;
   document.getElementById('res-title').textContent = currentNovel.title;
   document.getElementById('res-author').textContent = currentNovel.author;
   document.getElementById('res-date').textContent = currentNovel.date;
@@ -467,36 +445,36 @@ function escapeHtml(text) {
 function downloadNovel() {
   if (!currentNovel) return;
 
-  const downloadHTML = `<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<title>${escapeHtml(currentNovel.title)} — ${escapeHtml(currentNovel.author)}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-  body{background:#0d0d0d;color:#ffb000;font-family:'VT323',monospace;max-width:700px;margin:40px auto;padding:40px;line-height:1.8}
-  h1{font-size:2.2rem;text-align:center;margin-bottom:10px;text-shadow:0 0 8px #ffb000}
-  .author{text-align:center;font-style:italic;color:#b87a00;margin-bottom:40px;font-size:1.1rem}
-  .ornament{text-align:center;font-size:1.5rem;color:#b87a00;margin:20px 0}
-  p{text-indent:2em;margin-bottom:1.2em;font-size:1.15rem;text-align:justify}
-  p:first-child{text-indent:0}
-  p:first-child::first-letter{font-size:3rem;float:left;line-height:0.8;margin-right:8px;margin-top:4px;font-weight:700;color:#ffb000;text-shadow:0 0 8px #ffb000}
-  .footer{margin-top:60px;text-align:center;font-size:0.9rem;color:#555;border-top:1px solid #333;padding-top:20px}
-  .meta{text-align:center;color:#555;font-size:0.85rem;margin-bottom:30px}
-</style>
-</head>
-<body>
-  <div class="ornament">❦</div>
-  <h1>${escapeHtml(currentNovel.title)}</h1>
-  <p class="author">di ${escapeHtml(currentNovel.author)} e I-Musa</p>
-  <div class="meta">Generato il ${currentNovel.date}</div>
-  <div class="ornament">❦</div>
-  ${document.getElementById('res-text').innerHTML}
-  <div class="footer">
-    <p>Creato con I-Musa — by Merchat Solutions</p>
-  </div>
-</body>
-</html>`;
+  const downloadHTML = '<!DOCTYPE html>\n' +
+    '<html lang="it">\n' +
+    '<head>\n' +
+    '<meta charset="UTF-8">\n' +
+    '<title>' + escapeHtml(currentNovel.title) + ' — ' + escapeHtml(currentNovel.author) + '</title>\n' +
+    '<style>\n' +
+    '  @import url(\'https://fonts.googleapis.com/css2?family=VT323&display=swap\');\n' +
+    '  body{background:#0d0d0d;color:#ffb000;font-family:\'VT323\',monospace;max-width:700px;margin:40px auto;padding:40px;line-height:1.8}\n' +
+    '  h1{font-size:2.2rem;text-align:center;margin-bottom:10px;text-shadow:0 0 8px #ffb000}\n' +
+    '  .author{text-align:center;font-style:italic;color:#b87a00;margin-bottom:40px;font-size:1.1rem}\n' +
+    '  .ornament{text-align:center;font-size:1.5rem;color:#b87a00;margin:20px 0}\n' +
+    '  p{text-indent:2em;margin-bottom:1.2em;font-size:1.15rem;text-align:justify}\n' +
+    '  p:first-child{text-indent:0}\n' +
+    '  p:first-child::first-letter{font-size:3rem;float:left;line-height:0.8;margin-right:8px;margin-top:4px;font-weight:700;color:#ffb000;text-shadow:0 0 8px #ffb000}\n' +
+    '  .footer{margin-top:60px;text-align:center;font-size:0.9rem;color:#555;border-top:1px solid #333;padding-top:20px}\n' +
+    '  .meta{text-align:center;color:#555;font-size:0.85rem;margin-bottom:30px}\n' +
+    '</style>\n' +
+    '</head>\n' +
+    '<body>\n' +
+    '  <div class="ornament">❦</div>\n' +
+    '  <h1>' + escapeHtml(currentNovel.title) + '</h1>\n' +
+    '  <p class="author">di ' + escapeHtml(currentNovel.author) + ' e I-Musa</p>\n' +
+    '  <div class="meta">Generato il ' + currentNovel.date + '</div>\n' +
+    '  <div class="ornament">❦</div>\n' +
+    '  ' + document.getElementById('res-text').innerHTML + '\n' +
+    '  <div class="footer">\n' +
+    '    <p>Creato con I-Musa — by Merchat Solutions</p>\n' +
+    '  </div>\n' +
+    '</body>\n' +
+    '</html>';
 
   const blob = new Blob([downloadHTML], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
@@ -515,7 +493,7 @@ function newNovel() {
   showScreen('form');
 }
 
-document.addEventListener('DOMContentLoaded', () => document.getElementById('input-name').focus());
+document.addEventListener('DOMContentLoaded', function() { document.getElementById('input-name').focus(); });
 </script>
 </body>
 </html>
