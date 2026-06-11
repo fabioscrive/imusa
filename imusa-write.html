@@ -53,16 +53,17 @@
   .novel-display p:first-child{text-indent:0}
   .novel-display p:first-child::first-letter{font-size:2.5em;float:left;line-height:0.8;margin-right:6px;margin-top:4px;color:var(--amber);text-shadow:0 0 8px var(--amber)}
   .status-line{color:var(--amber-dim);font-size:1.2rem;margin-top:0.5rem}
-  .model-info{font-size:1rem;color:var(--amber-dim);margin-top:0.5rem;padding:0.5rem;border:1px dashed var(--amber-dim);border-radius:4px}
-  .model-info.ok{border-color:#0f0;color:#0f0}
-  .model-info.warn{border-color:#ff0;color:#ff0}
-  .model-info.err{border-color:#f44;color:#f44}
+  .api-box{margin-top:1.5rem;padding:1rem;border:1px dashed var(--amber-dim);border-radius:4px}
+  .api-box label{display:block;margin-bottom:0.5rem;font-size:1.2rem}
+  .api-box input{width:100%;max-width:100%}
+  .api-note{font-size:1rem;color:var(--amber-dim);margin-top:0.5rem}
+  .api-note a{color:var(--amber);text-decoration:underline}
   @media(max-width:768px){.crt-monitor{width:98vw;height:95vh;padding:12px}.screen-content{padding:1.2rem;font-size:1.3rem}.crt-input{font-size:1.3rem}.crt-textarea{font-size:1.2rem}}
 </style>
 </head>
 <body>
 <div class="crt-monitor">
-  <div class="crt-brand">I-Musa Terminal v4.0 — WebLLM Edition</div>
+  <div class="crt-brand">I-Musa Terminal v4.0 — Zero Peso Edition</div>
   <div class="crt-screen">
     <div class="crt-vignette"></div>
     <div class="screen-content">
@@ -86,20 +87,6 @@
         <div id="greet-content"></div>
       </div>
 
-      <!-- MODEL LOADING -->
-      <div class="screen-section" id="screen-model">
-        <div style="margin-bottom:2rem"><span class="sep">═══════════════════════════════════════</span></div>
-        <div style="margin-bottom:1.5rem">I-Musa sta caricando il modello neurale...</div>
-        <div class="model-info" id="model-status">Verifica supporto WebGPU...</div>
-        <div class="loading-bar" style="margin-top:1.5rem"><div class="loading-bar-fill" id="model-fill"></div></div>
-        <div style="margin-top:1rem;color:var(--amber-dim);font-size:1.2rem" id="model-detail">Inizializzazione...</div>
-        <div style="margin-top:2rem;font-size:1.1rem;color:var(--amber-dim)">
-          <span class="sep">[</span> Modello: Llama-3.2-3B-Instruct <span class="sep">]</span><br>
-          <span class="sep">[</span> Dimensione: ~2.2 GB <span class="sep">]</span><br>
-          <span class="sep">[</span> Primo caricamento: 30-90 secondi <span class="sep">]</span>
-        </div>
-      </div>
-
       <!-- FORM -->
       <div class="screen-section" id="screen-form">
         <div style="margin-bottom:1.5rem"><span class="sep">═══════════════════════════════════════</span></div>
@@ -112,20 +99,24 @@
           <textarea class="crt-textarea" id="input-prompt" rows="5" placeholder="Descrivi la trama, i personaggi, l'ambientazione..." oninput="updateWordCounter()"></textarea>
         </div>
         <div class="word-counter" id="word-counter">0 / 200 parole</div>
+
+        <div style="margin-bottom:1.5rem;margin-top:1.5rem"><span class="sep">[3/3]</span> MODELLO AI</div>
+        <div style="margin-bottom:0.5rem;color:var(--amber-dim);font-size:1.2rem">
+          <span class="sep">[</span> Qwen2.5-7B-Instruct (Hugging Face) <span class="sep">]</span> — Narrativa italiana avanzata
+        </div>
         <div style="margin-top:2rem">
-          <button class="crt-btn" id="btn-generate" onclick="generateNovel()" disabled>
+          <button class="crt-btn" id="btn-generate" onclick="generateNovel()">
             <span style="display:inline-block;width:8px;height:8px;background:var(--amber);border-radius:50%;margin-right:8px;vertical-align:middle;animation:blinkLed 2s infinite"></span>
             GENERA ROMANZO
           </button>
         </div>
-        <div class="model-info" id="model-ready" style="margin-top:1rem;display:none">Modello pronto! WebGPU attivo.</div>
       </div>
 
       <!-- LOADING -->
       <div class="screen-section" id="screen-loading">
         <div style="margin-bottom:2rem">I-Musa sta scrivendo il tuo romanzo...</div>
         <div class="loading-bar"><div class="loading-bar-fill" id="loading-fill"></div></div>
-        <div style="margin-top:1rem;color:var(--amber-dim);font-size:1.2rem" id="loading-status">Elaborazione in corso...</div>
+        <div style="margin-top:1rem;color:var(--amber-dim);font-size:1.2rem" id="loading-status">Connessione a Hugging Face...</div>
       </div>
 
       <!-- RESULT -->
@@ -152,17 +143,12 @@
   <div class="power-led"></div>
 </div>
 
-<script type="module">
-import * as webllm from "https://esm.run/@mlc-ai/web-llm";
-
+<script>
 let userName = '';
 let currentNovel = null;
-let engine = null;
-let modelLoaded = false;
 
-const MODEL_ID = "Llama-3.2-3B-Instruct-q4f16_1-MLC";
-const FALLBACK_MODEL = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
-
+const HF_API_KEY = "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";
+const HF_API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct";
 const SYSTEM_PROMPT = "Sei I-Musa, un'intelligenza artificiale narratrice di rara sensibilita letteraria. Scrivi un racconto breve in italiano (tra 400 e 600 parole) basandoti ESCLUSIVAMENTE sul titolo e sul prompt forniti dall'utente. Non ignorare alcun dettaglio del prompt: personaggi, luoghi, atmosfera, tono - tutto deve riflettersi nella storia. Usa una prosa curata, con ritmo e immagini precise. Suddividi il testo in paragrafi. Non usare markdown, asterischi, titoli o numerazioni. Solo prosa narrativa pura.";
 
 function showScreen(id) {
@@ -182,73 +168,6 @@ function typeText(el, text, speed) {
   });
 }
 
-function updateModelStatus(msg, type) {
-  const el = document.getElementById('model-status');
-  el.textContent = msg;
-  el.className = 'model-info ' + (type || '');
-}
-
-function updateModelDetail(msg) {
-  document.getElementById('model-detail').textContent = msg;
-}
-
-function updateModelProgress(pct) {
-  document.getElementById('model-fill').style.width = pct + '%';
-}
-
-async function initModel() {
-  showScreen('model');
-
-  try {
-    if (!navigator.gpu) {
-      throw new Error('WebGPU non supportato dal browser');
-    }
-
-    updateModelStatus('WebGPU rilevato. Caricamento modello...', 'ok');
-    updateModelDetail('Connessione al server MLC...');
-
-    const initProgressCallback = function(report) {
-      updateModelProgress(report.progress * 100);
-      updateModelDetail(report.text || 'Caricamento...');
-    };
-
-    try {
-      engine = await webllm.CreateMLCEngine(MODEL_ID, {
-        initProgressCallback: initProgressCallback
-      });
-    } catch(e) {
-      updateModelStatus('Modello 3B troppo pesante. Provo con 1B...', 'warn');
-      updateModelProgress(0);
-      engine = await webllm.CreateMLCEngine(FALLBACK_MODEL, {
-        initProgressCallback: initProgressCallback
-      });
-    }
-
-    modelLoaded = true;
-    updateModelStatus('Modello pronto! WebGPU attivo.', 'ok');
-    updateModelDetail('Caricamento completato.');
-    updateModelProgress(100);
-
-    setTimeout(function() {
-      showScreen('form');
-      document.getElementById('btn-generate').disabled = false;
-      document.getElementById('model-ready').style.display = 'block';
-    }, 800);
-
-  } catch(e) {
-    console.error('WebLLM error:', e);
-    updateModelStatus('Errore: ' + e.message, 'err');
-    updateModelDetail('Fallback al generatore locale...');
-
-    setTimeout(function() {
-      showScreen('form');
-      document.getElementById('btn-generate').disabled = false;
-      document.getElementById('model-ready').textContent = 'Fallback: generatore locale attivo (WebGPU non disponibile)';
-      document.getElementById('model-ready').style.display = 'block';
-    }, 1500);
-  }
-}
-
 document.getElementById('input-name').addEventListener('keydown', function(e) {
   if (e.key !== 'Enter') return;
   const name = this.value.trim();
@@ -261,15 +180,13 @@ document.getElementById('input-name').addEventListener('keydown', function(e) {
     '<div style="margin-bottom:1.5rem" id="line2"></div>' +
     '<div style="margin-bottom:2rem" id="line3"></div>' +
     '<div style="margin-bottom:1rem"><span class="sep">>></span> Pronto per iniziare?</div>' +
-    '<div style="margin-top:1rem"><button class="crt-btn" id="btn-start">CARICA MODELLO AI →</button></div>';
+    '<div style="margin-top:1rem"><button class="crt-btn" onclick="showScreen(\'form\')">INIZIA A SCRIVERE →</button></div>';
 
   setTimeout(function() {
     typeText(document.getElementById('line1'), 'Piacere di conoscerti, ' + name + '.').then(function() {
       return typeText(document.getElementById('line2'), 'Ti aiutero a scrivere un breve romanzo.');
     }).then(function() {
-      return typeText(document.getElementById('line3'), 'Carico il modello AI nel tuo browser...');
-    }).then(function() {
-      document.getElementById('btn-start').addEventListener('click', initModel);
+      return typeText(document.getElementById('line3'), 'Zero peso sul tuo dispositivo. L\'AI gira sui server di Hugging Face.');
     });
   }, 200);
 });
@@ -294,59 +211,78 @@ async function generateNovel() {
   const fill = document.getElementById('loading-fill');
   const status = document.getElementById('loading-status');
 
-  if (modelLoaded && engine) {
-    status.textContent = 'Generazione con Llama AI in corso...';
-    fill.style.width = '10%';
+  fill.style.width = '15%';
+  status.textContent = 'Connessione a Hugging Face...';
 
-    try {
-      const userMessage = 'Titolo: "' + title + '"\n\nPrompt: ' + prompt;
+  try {
+    const userMessage = 'Titolo: "' + title + '"\n\nPrompt: ' + prompt;
 
-      const messages = [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userMessage }
-      ];
-
-      const reply = await engine.chat.completions.create({
-        messages: messages,
+    const payload = {
+      inputs: "<|im_start|>system\n" + SYSTEM_PROMPT + "<|im_end|>\n<|im_start|>user\n" + userMessage + "<|im_end|>\n<|im_start|>assistant\n",
+      parameters: {
+        max_new_tokens: 800,
         temperature: 0.8,
-        max_tokens: 800,
-        top_p: 0.9
-      });
-
-      const text = reply.choices[0].message.content.trim();
-
-      if (!text || text.length < 80) {
-        throw new Error('Risposta troppo breve dal modello');
+        top_p: 0.9,
+        return_full_text: false
       }
+    };
 
-      fill.style.width = '100%';
-      currentNovel = { title: title, author: userName || 'Anonimo', text: text, date: new Date().toLocaleDateString('it-IT') };
-      displayNovel(text, 'AI');
-      setTimeout(function() { showScreen('result'); }, 500);
+    fill.style.width = '40%';
+    status.textContent = 'Generazione in corso...';
 
-    } catch(e) {
-      console.error('AI generation error:', e);
-      status.textContent = 'Errore AI, passo al generatore locale...';
-      fill.style.width = '50%';
+    const res = await fetch(HF_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + HF_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
 
-      await new Promise(function(r) { setTimeout(r, 1000); });
-      const text = generateLocalStory(title, prompt);
+    if (!res.ok) {
+      const errData = await res.json().catch(function() { return {}; });
+      const errMsg = (errData.error && errData.error.message) || ('HTTP ' + res.status);
 
-      fill.style.width = '100%';
-      currentNovel = { title: title, author: userName || 'Anonimo', text: text, date: new Date().toLocaleDateString('it-IT') };
-      displayNovel(text, 'Locale');
-      setTimeout(function() { showScreen('result'); }, 500);
+      if (res.status === 401 || res.status === 403) {
+        throw new Error('API Key non valida. Verifica su huggingface.co/settings/tokens');
+      }
+      if (res.status === 503) {
+        throw new Error('Modello in caricamento su Hugging Face. Riprova tra 30 secondi.');
+      }
+      throw new Error(errMsg);
     }
-  } else {
-    status.textContent = 'Generazione locale in corso...';
 
-    await new Promise(function(r) { setTimeout(r, 2000); });
-    const text = generateLocalStory(title, prompt);
+    const data = await res.json();
+    let text = '';
+
+    if (Array.isArray(data) && data[0] && data[0].generated_text) {
+      text = data[0].generated_text;
+    } else if (data.generated_text) {
+      text = data.generated_text;
+    } else {
+      throw new Error('Risposta inattesa dal server');
+    }
+
+    text = text.replace(/<\|im_start\|>assistant\n/, '').replace(/<\|im_end\|>/, '').trim();
+
+    if (!text || text.length < 80) {
+      throw new Error('Risposta troppo breve');
+    }
 
     fill.style.width = '100%';
     currentNovel = { title: title, author: userName || 'Anonimo', text: text, date: new Date().toLocaleDateString('it-IT') };
-    displayNovel(text, 'Locale');
+    displayNovel(text, 'HF');
     setTimeout(function() { showScreen('result'); }, 500);
+
+  } catch(e) {
+    console.error('HF API error:', e);
+    fill.style.width = '100%';
+    status.textContent = 'Errore: ' + e.message;
+
+    setTimeout(function() {
+      showScreen('form');
+      alert('Errore: ' + e.message + '\n\nSe il modello e in caricamento, riprova tra 30-60 secondi.');
+    }, 1500);
   }
 }
 
@@ -363,9 +299,7 @@ function displayNovel(text, mode) {
   document.getElementById('res-author').textContent = currentNovel.author;
   document.getElementById('res-date').textContent = currentNovel.date;
   document.getElementById('res-text').innerHTML = html;
-
-  const modelLabel = modelLoaded ? 'Llama-3.2-3B (WebGPU)' : 'Generatore Locale';
-  document.getElementById('res-status').textContent = '[' + modelLabel + '] ' + wordCount + ' parole — Tutto nel tuo browser';
+  document.getElementById('res-status').textContent = '[Qwen2.5-7B (Hugging Face)] ' + wordCount + ' parole — Zero peso sul dispositivo';
 }
 
 function escapeHtml(text) {
@@ -423,169 +357,6 @@ function newNovel() {
   document.getElementById('word-counter').className = 'word-counter';
   currentNovel = null;
   showScreen('form');
-}
-
-// === GENERATORE LOCALE (FALLBACK) ===
-const storyFragments = {
-  openings: [
-    "Era un {weather} {time} quando {protagonist} {action} per la prima volta.",
-    "Nessuno avrebbe mai immaginato che {event} avrebbe cambiato tutto.",
-    "La {place} taceva da secoli, finche {protagonist} non {action}.",
-    "Quando {protagonist} ricevette {object}, capi che nulla sarebbe stato piu come prima.",
-    "Il {time} di {season} portava con se un presagio che {protagonist} avrebbe compreso solo molto piu tardi.",
-    "{protagonist} non sapeva ancora che {event} stava per cambiare il corso della sua esistenza.",
-    "Nella {place}, sotto un cielo {weather}, {protagonist} {action} con il cuore in gola.",
-    "Tutto comincio quando {protagonist} decise di {action}, quel {time} lontano.",
-    "La leggenda narra che in {place}, durante un {weather} {time}, {event} prese forma.",
-    "{protagonist} aveva atteso a lungo quel momento. Finalmente, {action}."
-  ],
-  developments: [
-    "{protagonist} {emotion} mentre {situation} si faceva sempre piu {intensity}.",
-    "Tra le {place_adj} vie di {place}, {protagonist} scopri {discovery} che nessuno conosceva.",
-    "Il {antagonist} osservava dall'ombra, {antagonist_action} con {emotion_adj} determinazione.",
-    "Ogni {time_unit} che passava, {situation} diventava piu {intensity}, e {protagonist} sapeva di dover {action}.",
-    "La verita, nascosta dietro {object}, era piu {intensity} di quanto chiunque potesse immaginare.",
-    "{protagonist} si trovo di fronte a una scelta: {action} o lasciare che {situation} prendesse il sopravvento.",
-    "In un angolo remoto di {place}, {protagonist} trovo {object}, e con esso {discovery}.",
-    "Il {antagonist} si avvicinava. {protagonist} poteva sentirlo, come un {weather} che si avvicina all'orizzonte.",
-    "{emotion}, {protagonist} capi che {revelation} era solo la punta dell'iceberg.",
-    "La {place} sembrava respirare. Ogni pietra, ombra raccontava di {event}."
-  ],
-  climaxes: [
-    "Fu in quel preciso istante, mentre {weather} {action} fuori, che {protagonist} capi: {revelation}.",
-    "La {place} tremo. Non fisicamente, ma nello spirito di chi l'abitava. {protagonist} {action} con tutta la forza che gli restava.",
-    "Il confronto con {antagonist} era inevitabile. {protagonist} {emotion}, ma non arretro di un passo.",
-    "Quando {object} rivelo il suo segreto, il mondo di {protagonist} si capovolse per sempre.",
-    "Nessuno avrebbe potuto prevedere che {event} sarebbe stato il catalizzatore di tutto.",
-    "{protagonist} {action}, e in quel gesto si condenso tutto il significato della sua {time}.",
-    "La verita esplose come un {weather} in una notte serena: {revelation}.",
-    "In un attimo che duro un'eternita, {protagonist} e {antagonist} si guardarono. {emotion}.",
-    "{object} brillo, e {place} risplende di una luce che non si vedeva da {time_unit}.",
-    "{protagonist} capi che {action} era l'unica via. {revelation}, non importava il prezzo."
-  ],
-  endings: [
-    "E cosi, {protagonist} {final_action}, lasciando dietro di se {place} e tutto cio che rappresentava. Ma {object} rimase, silenzioso testimone di una storia che nessuno avrebbe mai dimenticato.",
-    "La {place} torno alla sua quiete, ma qualcosa era cambiato per sempre. {protagonist} se ne ando, portando con se {object} e il ricordo di {event}.",
-    "Forse non era la fine che {protagonist} sperava, ma era la fine di cui aveva bisogno. E a volte, quella e la storia piu vera di tutte.",
-    "Quando l'ultimo {time_unit} di quella {season} trascorse, {protagonist} guardo {place} per l'ultima volta. {revelation} era diventata parte di lui, come un marchio invisibile.",
-    "La storia di {protagonist} e {place} non finisce qui. Ma ogni racconto, prima o poi, deve trovare il suo {time_unit} di riposo. E questo era il suo.",
-    "{protagonist} {final_action}, e {place} lo lascio andare. Ma {object} rimase, custode di un segreto che il tempo avrebbe lentamente dimenticato.",
-    "Era finita. {event} era ormai un ricordo, e {protagonist} un nome che pochi ancora pronunciavano. Ma {place} ricordava.",
-    "Con {object} stretto al petto, {protagonist} {final_action}. {revelation} lo accompagno, silenziosa compagna di viaggio.",
-    "La {place} si risveglio a un nuovo {time}, diverso ma non meno vero. {protagonist} aveva fatto la sua parte.",
-    "E cosi, in un {weather} {time}, {protagonist} chiuse il cerchio. {final_action}, consapevole che {revelation} era solo l'inizio."
-  ],
-
-  weather: ["giorno piovoso", "sera nebbiosa", "mattino luminoso", "notte tempestosa", "crepuscolo dorato", "alba fredda", "pomeriggio di sole", "notte stellata", "giorno di neve", "sera di vento"],
-  time: ["autunno", "primavera", "inverno", "estate", "maggio", "ottobre", "novembre", "mattino", "sera", "mezzanotte", "alba", "tramonto", "gennaio", "giugno"],
-  season: ["quell'autunno", "quella primavera", "quell'inverno", "quell'estate", "quell'anno", "quella stagione", "quel periodo", "quel tempo"],
-  time_unit: ["giorno", "mese", "anno", "istante", "momento", "ora", "secolo", "decennio", "tempo"],
-  emotion: ["tremo", "sorrise amaramente", "sospiro", "strinse i pugni", "chiuse gli occhi", "alzo lo sguardo", "sbianco", "rise", "pianse", "si fermo", "sussurro"],
-  emotion_adj: ["fredda", "ardente", "silenziosa", "disperata", "ferma", "tremante", "implacabile", "dolce", "crudele", "luminosa"],
-  intensity: ["opprimente", "irreale", "incalzante", "misteriosa", "inevitabile", "crescente", "palpitante", "inquietante", "magnetica", "fragile"],
-  action: ["attraverso la soglia", "apri la lettera", "guardo fuori dalla finestra", "prese in mano l'oggetto", "fece il primo passo", "decise di restare", "scelse di partire", "alzo la voce", "si volto", "tocco il muro", "si inginocchio", "sorrise"],
-  final_action: ["se ne ando", "resto", "sorrise per l'ultima volta", "alzo lo sguardo verso il cielo", "chiuse il libro della sua vita li", "decise di ricominciare", "prese la strada del ritorno", "si allontano", "rimase in silenzio", "accolse il futuro"],
-  antagonist_action: ["aspettando il momento giusto", "pianificando ogni mossa", "sorridendo con malizia", "osservando ogni passo", "tramando nell'ombra", "raccogliendo informazioni", "preparando la trappola", "meditando vendetta"],
-  discovery: ["un segreto sepolto", "una verita dimenticata", "un passato che non conosceva", "un legame invisibile", "una porta chiusa da troppo tempo", "un messaggio antico", "un mistero familiare", "una rivelazione inaspettata", "un tesoro nascosto", "un'eredit oscura"],
-  revelation: ["la verita non libera, ma condanna", "alcune storie non cercano eroi, solo testimoni", "il passato non muore mai, dorme solo", "ogni fine e un inizio mascherato", "l'amore e la paura sono la stessa faccia della medaglia", "la liberta ha un prezzo che pochi sono disposti a pagare", "il destino si scrive nelle scelte, non nelle stelle", "nessuno e davvero solo finche ha un ricordo", "la vera forza e nel lasciar andare", "il tempo guarisce tutto, ma non dimentica nulla"],
-  place_adj: ["silenziosi", "antichi", "deserti", "famosi", "dimenticati", "misteriosi", "angusti", "vasti", "oscuri", "dorati", "freddi", "caldi"]
-};
-
-function getRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function generateLocalStory(title, prompt) {
-  const words = prompt.toLowerCase().split(/[\s,.;:!?]+/).filter(function(w) { return w.length > 3; });
-
-  const possibleNames = prompt.match(/[A-Z][a-z]+/g) || [];
-  const protagonist = possibleNames[0] || "il protagonista";
-  const antagonist = possibleNames[1] || "l'antagonista";
-
-  const placeMatches = prompt.match(/(?:in|a|presso|vicino a|nel|nella|nello)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi) || [];
-  const place = placeMatches[0] ? placeMatches[0].replace(/^(in|a|presso|vicino a|nel|nella|nello)\s+/i, '') : "il luogo";
-
-  const objectMatches = prompt.match(/(?:un|una|il|la|lo)\s+([a-z]+\s+[a-z]+|[a-z]{4,})/gi) || [];
-  const object = objectMatches[0] ? objectMatches[0].replace(/^(un|una|il|la|lo)\s+/i, '') : "l'oggetto misterioso";
-
-  const eventMatches = prompt.match(/(?:quando|dopo|durante|per)\s+([^,.]+)/gi) || [];
-  const event = eventMatches[0] ? eventMatches[0].replace(/^(quando|dopo|durante|per)\s+/i, '') : "l'incontro";
-
-  const situation = words.slice(0, 3).join(' ') || "la situazione";
-
-  const opening = getRandom(storyFragments.openings)
-    .replace(/{weather}/g, getRandom(storyFragments.weather))
-    .replace(/{time}/g, getRandom(storyFragments.time))
-    .replace(/{protagonist}/g, protagonist)
-    .replace(/{action}/g, getRandom(storyFragments.action))
-    .replace(/{event}/g, event)
-    .replace(/{place}/g, place)
-    .replace(/{object}/g, object)
-    .replace(/{season}/g, getRandom(storyFragments.season))
-    .replace(/{place_adj}/g, getRandom(storyFragments.place_adj));
-
-  const dev1 = getRandom(storyFragments.developments)
-    .replace(/{protagonist}/g, protagonist)
-    .replace(/{emotion}/g, getRandom(storyFragments.emotion))
-    .replace(/{situation}/g, situation)
-    .replace(/{intensity}/g, getRandom(storyFragments.intensity))
-    .replace(/{place_adj}/g, getRandom(storyFragments.place_adj))
-    .replace(/{place}/g, place)
-    .replace(/{discovery}/g, getRandom(storyFragments.discovery))
-    .replace(/{antagonist}/g, antagonist)
-    .replace(/{antagonist_action}/g, getRandom(storyFragments.antagonist_action))
-    .replace(/{emotion_adj}/g, getRandom(storyFragments.emotion_adj))
-    .replace(/{time_unit}/g, getRandom(storyFragments.time_unit))
-    .replace(/{action}/g, getRandom(storyFragments.action))
-    .replace(/{object}/g, object)
-    .replace(/{revelation}/g, getRandom(storyFragments.revelation))
-    .replace(/{weather}/g, getRandom(storyFragments.weather));
-
-  const dev2 = getRandom(storyFragments.developments)
-    .replace(/{protagonist}/g, protagonist)
-    .replace(/{emotion}/g, getRandom(storyFragments.emotion))
-    .replace(/{situation}/g, "la tensione")
-    .replace(/{intensity}/g, getRandom(storyFragments.intensity))
-    .replace(/{place_adj}/g, getRandom(storyFragments.place_adj))
-    .replace(/{place}/g, place)
-    .replace(/{discovery}/g, getRandom(storyFragments.discovery))
-    .replace(/{antagonist}/g, antagonist)
-    .replace(/{antagonist_action}/g, getRandom(storyFragments.antagonist_action))
-    .replace(/{emotion_adj}/g, getRandom(storyFragments.emotion_adj))
-    .replace(/{time_unit}/g, getRandom(storyFragments.time_unit))
-    .replace(/{action}/g, getRandom(storyFragments.action))
-    .replace(/{object}/g, "il segreto")
-    .replace(/{revelation}/g, getRandom(storyFragments.revelation))
-    .replace(/{weather}/g, getRandom(storyFragments.weather));
-
-  const climax = getRandom(storyFragments.climaxes)
-    .replace(/{weather}/g, getRandom(storyFragments.weather))
-    .replace(/{action}/g, getRandom(storyFragments.action))
-    .replace(/{protagonist}/g, protagonist)
-    .replace(/{revelation}/g, getRandom(storyFragments.revelation))
-    .replace(/{place}/g, place)
-    .replace(/{antagonist}/g, antagonist)
-    .replace(/{object}/g, object)
-    .replace(/{event}/g, event)
-    .replace(/{emotion}/g, getRandom(storyFragments.emotion))
-    .replace(/{time_unit}/g, getRandom(storyFragments.time_unit))
-    .replace(/{season}/g, getRandom(storyFragments.season));
-
-  const ending = getRandom(storyFragments.endings)
-    .replace(/{protagonist}/g, protagonist)
-    .replace(/{final_action}/g, getRandom(storyFragments.final_action))
-    .replace(/{place}/g, place)
-    .replace(/{object}/g, object)
-    .replace(/{event}/g, event)
-    .replace(/{time_unit}/g, getRandom(storyFragments.time_unit))
-    .replace(/{season}/g, getRandom(storyFragments.season))
-    .replace(/{revelation}/g, getRandom(storyFragments.revelation))
-    .replace(/{weather}/g, getRandom(storyFragments.weather))
-    .replace(/{time}/g, getRandom(storyFragments.time))
-    .replace(/{antagonist}/g, antagonist)
-    .replace(/{place_adj}/g, getRandom(storyFragments.place_adj));
-
-  return title + "\n\n" + opening + "\n\n" + dev1 + "\n\n" + dev2 + "\n\n" + climax + "\n\n" + ending;
 }
 
 document.addEventListener('DOMContentLoaded', function() { document.getElementById('input-name').focus(); });
