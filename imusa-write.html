@@ -56,7 +56,7 @@
 </head>
 <body>
 <div class="crt-monitor">
-  <div class="crt-brand">I-Musa Terminal v3.0</div>
+  <div class="crt-brand">I-Musa Terminal v3.1</div>
   <div class="crt-screen">
     <div class="crt-vignette"></div>
     <div class="screen-content">
@@ -94,7 +94,7 @@
         <div class="word-counter" id="word-counter">0 / 200 parole</div>
         <div style="margin-bottom:1.5rem;margin-top:1.5rem"><span class="sep">[3/3]</span> MODELLO AI</div>
         <div style="margin-bottom:0.5rem;color:var(--amber-dim);font-size:1.2rem">
-          <span class="sep">[</span> Groq (Llama 3.1) <span class="sep">]</span> — Piano gratuito, 1.000 req/giorno
+          <span class="sep">[</span> Claude Sonnet (Anthropic) <span class="sep">]</span> — Narrativa italiana avanzata
         </div>
         <div style="margin-top:2rem">
           <button class="crt-btn" onclick="generateNovel()">
@@ -203,7 +203,7 @@ async function generateNovel() {
   }, 400);
 
   try {
-    const text = await callGroqAPI(title, prompt);
+    const text = await callClaudeAPI(title, prompt);
     clearInterval(iv);
     fill.style.width = '100%';
     currentNovel = { title, author: userName || 'Anonimo', text, date: new Date().toLocaleDateString('it-IT') };
@@ -212,62 +212,46 @@ async function generateNovel() {
   } catch(e) {
     clearInterval(iv);
     console.error('API error:', e);
-    const localText = generateLocalNovel(title, prompt);
-    currentNovel = { title, author: userName || 'Anonimo', text: localText, date: new Date().toLocaleDateString('it-IT') };
-    displayNovel(localText, true);
-    setTimeout(() => showScreen('result'), 500);
+    showScreen('form');
+    alert('Errore durante la generazione: ' + e.message + '\n\nControlla la connessione e riprova.');
   }
 }
 
-async function callGroqAPI(title, prompt) {
-  const systemPrompt = "Sei I-Musa, un'intelligenza artificiale che scrive romanzi brevi in italiano. Scrivi un romanzo completo di massimo 500 parole basato sul prompt fornito. Usa un linguaggio evocativo e narrativo, con descrizioni atmosferiche e dialoghi naturali. Dividi il testo in paragrafi. Non usare markdown, titoli, asterischi o numeri. Solo testo narrativo puro.";
-  const userMessage = 'Titolo: "' + title + '". Prompt: ' + prompt + '.';
+async function callClaudeAPI(title, prompt) {
+  const systemPrompt = "Sei I-Musa, un'intelligenza artificiale narratrice di rara sensibilit\xE0 letteraria. Scrivi un racconto breve in italiano (tra 400 e 600 parole) basandoti ESCLUSIVAMENTE sul titolo e sul prompt forniti dall'utente. Non ignorare alcun dettaglio del prompt: personaggi, luoghi, atmosfera, tono \u2014 tutto deve riflettersi nella storia. Usa una prosa curata, con ritmo e immagini precise. Suddividi il testo in paragrafi. Non usare markdown, asterischi, titoli o numerazioni. Solo prosa narrativa pura.";
+  const userMessage = 'Titolo: "' + title + '".\n\nPrompt: ' + prompt;
   
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer gsk_free_tier'
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage }
-      ],
-      temperature: 0.8,
-      max_tokens: 800
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }]
     })
   });
   
-  if (!res.ok) throw new Error('HTTP ' + res.status);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err.error && err.error.message) || 'HTTP ' + res.status);
+  }
   const data = await res.json();
-  const text = data.choices[0].message.content.trim();
-  if (!text || text.length < 50) throw new Error('Risposta troppo breve');
+  const text = data.content.map(function(b){ return b.text || ''; }).join('').trim();
+  if (!text || text.length < 80) throw new Error('Risposta inattesa dal modello.');
   return text;
 }
 
 function generateLocalNovel(title, prompt) {
-  const keywords = prompt.split(/\s+/).slice(0, 6).join(', ');
-  const settings = [
-    'una città avvolta nella nebbia', 'un villaggio sulle montagne', 
-    'una metropoli futuristica', 'una piccola isola nel Mediterraneo',
-    'un castello antico', 'una foresta incantata'
-  ];
-  const setting = settings[Math.floor(Math.random() * settings.length)];
-  
-  return `Era una volta, in ${setting}, che la storia di "${title}" prese il suo primo respiro. ${userName || 'L\'autore'} aveva immaginato questo mondo per anni, tessendo fili di parole che ora danzavano sulla pagina.
-
-La protagonista, una figura enigmatica nata dalla fantasia del prompt "${keywords}", si muoveva tra le ombre e la luce di un mondo che le sfuggiva. Ogni passo che compiva risuonava di un destino più grande di lei, un destino scritto nelle stelle e nelle pagine di un libro antico.
-
-Il vento portava con sé echi di avventure passate e promesse di quelle future. Le strade lastricate di ciottoli raccontavano storie di chi le aveva percorse prima, lasciando impronte indelebili nella memoria del tempo.
-
-Quando il sole calò dietro le colline, tingendo il cielo di sfumature dorate e porpora, il cuore della storia batté più forte. Non era solo un racconto di ${keywords}, ma un viaggio nell'anima umana, nelle sue paure, nei suoi sogni e nella sua incrollabile capacità di sperare.
-
-E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trovò la sua conclusione. Non una fine, ma un nuovo inizio. Per ogni storia che finisce, infinite altre attendono di essere narrate, attendono solo una penna coraggiosa e un lettore pronto a sognare.`;
+  // Questo non viene più usato — conservato solo per compatibilità
+  return null;
 }
 
-function displayNovel(text, isLocal = false) {
+function displayNovel(text) {
   const paragraphs = text.split(/\n\n|\n/).filter(p => p.trim().length > 0);
   let html = '';
   paragraphs.forEach(para => {
@@ -280,8 +264,7 @@ function displayNovel(text, isLocal = false) {
   document.getElementById('res-author').textContent = currentNovel.author;
   document.getElementById('res-date').textContent = currentNovel.date;
   document.getElementById('res-text').innerHTML = html;
-  document.getElementById('res-status').textContent = 
-    (isLocal ? '[MODALITÀ LOCALE] ' : '[API Groq] ') + wordCount + ' parole — max 500';
+  document.getElementById('res-status').textContent = '[Claude Sonnet] ' + wordCount + ' parole';
 }
 
 function escapeHtml(text) {
