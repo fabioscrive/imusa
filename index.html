@@ -184,7 +184,7 @@
   .crowd-number { font-family:'DM Mono',monospace;font-size:7rem;font-weight:300;line-height:1;color:var(--amber);display:block;margin-bottom:.4rem;letter-spacing:-.05em; }
   .crowd-label { font-family:'DM Mono',monospace;font-size:.67rem;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-bottom:3rem; }
   .progress-track { height:2px;background:rgba(212,168,67,.1);position:relative;margin-bottom:1rem; }
-  .progress-fill { height:100%;background:var(--amber);width:0%;transition:width 1.5s ease; }
+  .progress-fill { height:100%;background:var(--amber);width:0%; }
   .progress-labels { display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.2em; }
   .crowd-desc { font-size:1rem;line-height:1.8;color:rgba(240,237,230,.58);margin:2.5rem auto;max-width:520px; }
   .btn-crowd { display:inline-block;background:var(--amber);color:var(--black);font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;padding:1.15rem 3.2rem;text-decoration:none;font-weight:500;transition:all .3s; }
@@ -413,16 +413,16 @@
   <div class="crowd-inner">
     <div class="section-label" style="justify-content:center;">Crowdfunding</div>
     <span class="crowd-number" id="counterNum">0</span>
-    <div class="crowd-label">preordini su 100 per arrivare in tutte le librerie</div>
+    <div class="crowd-label">preordini su 200 per arrivare in tutte le librerie</div>
     <div style="margin:0 0 1rem;">
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-labels">
         <span>0</span>
         <span id="progressPct">0%</span>
-        <span>100</span>
+        <span>200</span>
       </div>
     </div>
-    <p class="crowd-desc">Con 100 preordini, <em>I-Musa</em> arriva in tutte le librerie d'Italia e negli store online di tutto il mondo. Sii tra i primi a tenerlo in mano.</p>
+    <p class="crowd-desc">Con 200 preordini, <em>I-Musa</em> arriva in tutte le librerie d'Italia e negli store online di tutto il mondo. Sii tra i primi a tenerlo in mano.</p>
 
     <!-- Bookabook section -->
     <div class="bookabook-badge">
@@ -464,20 +464,25 @@
     el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';ring.style.transform='scale(1)';ring.style.borderColor='rgba(212,168,67,.35)';});
   });
 
-  // Counter
-  const target=23;
+  // Counter — animazione da 0 a 200 copie, barra e % da 0 a 100
   const counterEl=document.getElementById('counterNum'),fillEl=document.getElementById('progressFill'),pctEl=document.getElementById('progressPct');
+  const animDuration=2400;
+  function easeOutCubic(t){return 1-Math.pow(1-t,3);}
   const obs=new IntersectionObserver(entries=>{
     entries.forEach(e=>{
       if(e.isIntersecting){
-        let cur=0;const step=target/60;
-        const t=setInterval(()=>{
-          cur=Math.min(cur+step,target);
-          counterEl.textContent=Math.floor(cur);
-          const p=Math.round((cur/100)*100);
-          fillEl.style.width=p+'%';pctEl.textContent=p+'%';
-          if(cur>=target)clearInterval(t);
-        },25);
+        const start=performance.now();
+        function frame(now){
+          const elapsed=now-start;
+          const progress=easeOutCubic(Math.min(elapsed/animDuration,1));
+          const copies=Math.round(progress*200);
+          const pct=Math.round(copies/2);
+          counterEl.textContent=copies;
+          fillEl.style.width=pct+'%';
+          pctEl.textContent=pct+'%';
+          if(elapsed<animDuration)requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
         obs.unobserve(e.target);
       }
     });
