@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>i-Musa - Versione 2.9</title>
+    <title>i-Musa - Generatore AI di Romanzi</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,13 +13,7 @@
             --gold: #d4a574;
             --shadow: rgba(44, 24, 16, 0.15);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -27,458 +21,195 @@
             color: var(--ink);
             overflow-x: hidden;
         }
-
-        /* Animated background particles */
-        .bg-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.3;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--gold);
-            border-radius: 50%;
-            animation: float 15s infinite;
-        }
-
+        .bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.3; }
+        .particle { position: absolute; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; animation: float 15s infinite; }
         @keyframes float {
             0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
             10% { opacity: 1; }
             90% { opacity: 1; }
             100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
         }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        .container { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 50px; color: #fff; }
+        .header h1 { font-family: 'Crimson Text', serif; font-size: 3.5rem; font-weight: 700; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); letter-spacing: -0.5px; }
+        .header .subtitle { font-size: 1.1rem; opacity: 0.8; font-weight: 300; }
+        .divider { width: 100px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 20px auto; }
+        .form-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin-bottom: 40px; border: 1px solid rgba(255,255,255,0.2); }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--accent); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 14px 18px; border: 2px solid #e0d5c8; border-radius: 12px;
+            font-family: 'Inter', sans-serif; font-size: 1rem; transition: all 0.3s ease; background: #faf8f5;
         }
-
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            color: #fff;
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(139,69,19,0.1);
         }
-
-        .header h1 {
-            font-family: 'Crimson Text', serif;
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: -0.5px;
-        }
-
-        .header .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.8;
-            font-weight: 300;
-        }
-
-        .divider {
-            width: 100px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 20px auto;
-        }
-
-        /* Input Form */
-        .form-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin-bottom: 40px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--accent);
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e0d5c8;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #faf8f5;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .hint {
-            font-size: 0.85rem;
-            color: #888;
-            margin-top: 6px;
-            font-style: italic;
-        }
-
-        /* Generate Button */
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .hint { font-size: 0.85rem; color: #888; margin-top: 6px; font-style: italic; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
         .btn-generate {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--accent) 0%, #a0522d 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4);
+            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent) 0%, #a0522d 100%);
+            color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(139,69,19,0.4);
         }
-
-        .btn-generate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.5);
-        }
-
-        .btn-generate:active {
-            transform: translateY(0);
-        }
-
-        .btn-generate:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Loading State */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: var(--accent);
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #e0d5c8;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Novel Display */
-        .novel-container {
-            display: none;
-            background: var(--parchment);
-            border-radius: 20px;
-            padding: 60px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .novel-container.active {
-            display: block;
-        }
-
-        /* Book texture effect */
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,69,19,0.5); }
+        .btn-generate:active { transform: translateY(0); }
+        .btn-generate:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .loading { display: none; text-align: center; padding: 40px; color: white; }
+        .loading.active { display: block; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-quote { font-family: 'Crimson Text', serif; font-size: 1.1rem; font-style: italic; opacity: 0.7; margin-top: 15px; }
+        .novel-container { display: none; background: var(--parchment); border-radius: 20px; padding: 60px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        .novel-container.active { display: block; }
         .novel-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139,69,19,0.03) 2px, rgba(139,69,19,0.03) 4px);
-            pointer-events: none;
-            border-radius: 20px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139,69,19,0.03) 2px, rgba(139,69,19,0.03) 4px);
+            pointer-events: none; border-radius: 20px;
         }
-
-        .novel-header {
-            text-align: center;
-            margin-bottom: 50px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .novel-title {
-            font-family: 'Crimson Text', serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 15px;
-            line-height: 1.2;
-        }
-
-        .novel-author {
-            font-family: 'Crimson Text', serif;
-            font-size: 1.2rem;
-            font-style: italic;
-            color: var(--accent);
-            margin-bottom: 30px;
-        }
-
-        .ornament {
-            font-size: 2rem;
-            color: var(--gold);
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .novel-content {
-            font-family: 'Crimson Text', serif;
-            font-size: 1.15rem;
-            line-height: 1.8;
-            color: var(--ink);
-            text-align: justify;
-            position: relative;
-            z-index: 1;
-        }
-
-        .novel-content p {
-            margin-bottom: 1.5em;
-            text-indent: 2em;
-        }
-
-        .novel-content p:first-child {
-            text-indent: 0;
-        }
-
-        .novel-content p:first-child::first-letter {
-            font-size: 3.5rem;
-            float: left;
-            line-height: 0.8;
-            margin-right: 8px;
-            margin-top: 4px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        /* Actions */
-        .actions {
-            margin-top: 40px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #2c1810 0%, var(--accent) 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            box-shadow: 0 4px 15px rgba(44, 24, 16, 0.3);
-        }
-
-        .btn-download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(44, 24, 16, 0.4);
-        }
-
-        .btn-new {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 32px;
-            background: transparent;
-            color: var(--accent);
-            border: 2px solid var(--accent);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 15px;
-            text-decoration: none;
-        }
-
-        .btn-new:hover {
-            background: var(--accent);
-            color: white;
-        }
-
-        /* Error Message */
-        .error {
-            display: none;
-            background: #fee;
-            border: 2px solid #fcc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            color: #c33;
-            text-align: center;
-        }
-
-        .error.active {
-            display: block;
-        }
-
-        /* Responsive */
+        .novel-header { text-align: center; margin-bottom: 50px; position: relative; z-index: 1; }
+        .novel-title { font-family: 'Crimson Text', serif; font-size: 2.5rem; font-weight: 700; color: var(--ink); margin-bottom: 15px; line-height: 1.2; }
+        .novel-author { font-family: 'Crimson Text', serif; font-size: 1.2rem; font-style: italic; color: var(--accent); margin-bottom: 30px; }
+        .ornament { font-size: 2rem; color: var(--gold); text-align: center; margin: 20px 0; }
+        .novel-content { font-family: 'Crimson Text', serif; font-size: 1.15rem; line-height: 1.8; color: var(--ink); text-align: justify; position: relative; z-index: 1; }
+        .novel-content p { margin-bottom: 1.5em; text-indent: 2em; }
+        .novel-content p:first-child { text-indent: 0; }
+        .novel-content p:first-child::first-letter { font-size: 3.5rem; float: left; line-height: 0.8; margin-right: 8px; margin-top: 4px; font-weight: 700; color: var(--accent); }
+        .actions { margin-top: 40px; text-align: center; position: relative; z-index: 1; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn-download { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; background: linear-gradient(135deg, #2c1810 0%, var(--accent) 100%); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(44,24,16,0.3); }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(44,24,16,0.4); }
+        .btn-new { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; background: transparent; color: var(--accent); border: 2px solid var(--accent); border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .btn-new:hover { background: var(--accent); color: white; }
+        .error { display: none; background: #fee; border: 2px solid #fcc; border-radius: 12px; padding: 20px; margin-top: 20px; color: #c33; text-align: center; }
+        .error.active { display: block; }
+        .word-count { position: absolute; top: 20px; right: 20px; background: var(--accent); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; z-index: 2; }
+        .ai-badge { display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; margin-left: 10px; vertical-align: middle; font-weight: 600; letter-spacing: 0.5px; }
         @media (max-width: 768px) {
             .header h1 { font-size: 2.5rem; }
             .form-card { padding: 25px; }
             .novel-container { padding: 30px; }
             .novel-title { font-size: 1.8rem; }
-            .actions { display: flex; flex-direction: column; gap: 15px; }
-            .btn-new { margin-left: 0; }
-        }
-
-        /* Word count badge */
-        .word-count {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--accent);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            z-index: 2;
         }
     </style>
 </head>
 <body>
-
     <div class="bg-particles" id="particles"></div>
-
     <div class="container">
         <div class="header">
-            <h1>✨ I-Musa by Merchant Solutions</h1>
+            <h1>✨ i-Musa <span class="ai-badge">AI</span></h1>
             <div class="divider"></div>
-            <p class="subtitle">Crea il tuo romanzo in pochi secondi con i-Musa</p>
+            <p class="subtitle">Genera testi autentici con intelligenza artificiale</p>
         </div>
 
-        <!-- INPUT FORM -->
         <div class="form-card" id="inputForm">
-            <div class="form-group">
-                <label for="authorName">Il tuo nome (come autore)</label>
-                <input type="text" id="authorName" placeholder="Es. Leo Vasari" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="authorName">Il tuo nome (come autore)</label>
+                    <input type="text" id="authorName" placeholder="Es. Leo Vasari">
+                </div>
+                <div class="form-group">
+                    <label for="genere">Genere letterario</label>
+                    <select id="genere">
+                        <option value="romanzo breve">Romanzo breve</option>
+                        <option value="racconto">Racconto</option>
+                        <option value="poesia in prosa">Poesia in prosa</option>
+                        <option value="favola">Favola</option>
+                        <option value="thriller">Thriller</option>
+                        <option value="romanzo storico">Romanzo storico</option>
+                        <option value="fantasy">Fantasy</option>
+                        <option value="romanzo d'amore">Romanzo d'amore</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="novelTitle">Titolo del romanzo</label>
-                <input type="text" id="novelTitle" placeholder="Es. La Cassaforte di Pietra" required>
+                <label for="novelTitle">Titolo dell'opera</label>
+                <input type="text" id="novelTitle" placeholder="Es. La Cassaforte di Pietra">
             </div>
 
             <div class="form-group">
                 <label for="prompt">Prompt / Trama</label>
-                <textarea id="prompt" placeholder="Descrivi la trama, i personaggi, l'ambientazione o il tema del romanzo che vuoi scrivere..." required></textarea>
-                <p class="hint">Sii descrittivo: più dettagli fornisci, più il romanzo sarà coerente con le tue aspettative.</p>
+                <textarea id="prompt" placeholder="Descrivi la trama, i personaggi, l'ambientazione o il tema del testo che vuoi generare..."></textarea>
+                <p class="hint">Più dettagli fornisci, più il testo sarà fedele alle tue aspettative. Il testo viene generato da vera AI.</p>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="lunghezza">Lunghezza</label>
+                    <select id="lunghezza">
+                        <option value="300">Breve (~300 parole)</option>
+                        <option value="600" selected>Media (~600 parole)</option>
+                        <option value="1000">Lunga (~1000 parole)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stile">Stile narrativo</label>
+                    <select id="stile">
+                        <option value="classico e letterario">Classico e letterario</option>
+                        <option value="moderno e diretto">Moderno e diretto</option>
+                        <option value="poetico e evocativo">Poetico e evocativo</option>
+                        <option value="ironico e brillante">Ironico e brillante</option>
+                        <option value="dark e malinconico">Dark e malinconico</option>
+                    </select>
+                </div>
             </div>
 
             <button class="btn-generate" id="generateBtn" onclick="generateNovel()">
-                📖 Genera Romanzo
+                📖 Genera con AI
             </button>
-
             <div class="error" id="errorMsg"></div>
         </div>
 
-        <!-- LOADING -->
         <div class="loading" id="loadingSection">
             <div class="spinner"></div>
-            <p>L'AI sta scrivendo il tuo capolavoro...</p>
-            <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">Questo potrebbe richiedere fino a 30 secondi</p>
+            <p style="font-size:1.1rem; font-weight:500;">L'AI sta scrivendo il tuo testo...</p>
+            <p class="loading-quote" id="loadingQuote"></p>
         </div>
 
-        <!-- NOVEL OUTPUT -->
         <div class="novel-container" id="novelContainer">
             <div class="word-count" id="wordCount">0 parole</div>
-            
             <div class="novel-header">
                 <div class="ornament">❦</div>
                 <h2 class="novel-title" id="displayTitle"></h2>
                 <p class="novel-author">di <span id="displayAuthor"></span></p>
                 <div class="ornament">❦</div>
             </div>
-
             <div class="novel-content" id="novelContent"></div>
-
             <div class="actions">
                 <button class="btn-download" onclick="downloadNovel()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Scarica come HTML
                 </button>
                 <button class="btn-new" onclick="resetForm()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                        <path d="M3 3v5h5"></path>
-                    </svg>
-                    Nuovo Romanzo
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Nuovo testo
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Create background particles
+        // Particles
         const particlesContainer = document.getElementById('particles');
         for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (10 + Math.random() * 20) + 's';
-            particlesContainer.appendChild(particle);
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.top = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 15 + 's';
+            p.style.animationDuration = (10 + Math.random() * 20) + 's';
+            particlesContainer.appendChild(p);
         }
+
+        const loadingQuotes = [
+            "«Ogni lettore, quando legge, legge se stesso.» — Proust",
+            "«Un libro deve essere un'ascia per il mare ghiacciato dentro di noi.» — Kafka",
+            "«Bisogna avere il caos dentro di sé per partorire una stella danzante.» — Nietzsche",
+            "«Le parole sono, ovviamente, la forma più potente di droga usata dall'umanità.» — Kipling",
+            "«La scrittura è la pittura della voce.» — Voltaire"
+        ];
 
         let currentNovelHTML = '';
         let currentNovelText = '';
@@ -486,100 +217,84 @@
         let currentAuthor = '';
 
         async function generateNovel() {
-            const author = document.getElementById('authorName').value.trim();
+            const author = document.getElementById('authorName').value.trim() || 'Anonimo';
             const title = document.getElementById('novelTitle').value.trim();
             const prompt = document.getElementById('prompt').value.trim();
+            const genere = document.getElementById('genere').value;
+            const lunghezza = document.getElementById('lunghezza').value;
+            const stile = document.getElementById('stile').value;
 
-            if (!author || !title || !prompt) {
-                showError('Per favore, compila tutti i campi prima di generare il romanzo.');
+            if (!title || !prompt) {
+                showError('Per favore, inserisci almeno il titolo e la trama prima di generare.');
                 return;
             }
 
-            // UI State
             document.getElementById('inputForm').style.display = 'none';
             document.getElementById('loadingSection').classList.add('active');
+            document.getElementById('novelContainer').classList.remove('active');
             document.getElementById('errorMsg').classList.remove('active');
+
+            // Random loading quote
+            document.getElementById('loadingQuote').textContent =
+                loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
 
             currentTitle = title;
             currentAuthor = author;
 
+            const systemPrompt = `Sei un romanziere italiano di talento. Il tuo compito è scrivere un testo letterario originale in italiano.
+Regole assolute:
+- Scrivi SOLO testo narrativo puro, nessun markdown, nessun titolo interno, nessun asterisco, nessuna lista.
+- Dividi il testo in paragrafi separati da righe vuote.
+- Stile: ${stile}.
+- Genere: ${genere}.
+- Lunghezza target: circa ${lunghezza} parole.
+- Il testo deve essere coerente con il prompt fornito dall'utente, non un testo generico.
+- Usa dialoghi, descrizioni sensoriali, introspezione psicologica dei personaggi.
+- Inizia direttamente con la narrazione, senza introduzioni meta-testuali.`;
+
+            const userPrompt = `Titolo: "${title}"
+Autore (firma il lavoro nello stile di): ${author}
+Genere: ${genere}
+Trama/Prompt: ${prompt}
+
+Scrivi il testo ora.`;
+
             try {
-                // Call Groq API (free tier, no credit card required)
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer gsk_free_tier_demo_key' // Groq allows demo/testing
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: 'llama-3.1-8b-instant',
-                        messages: [
-                            {
-                                role: 'system',
-                                content: 'Sei un scrittore professionista italiano. Scrivi un breve romanzo di massimo 500 parole in italiano, con stile narrativo coinvolgente, descrizioni evocative e dialoghi naturali. Dividi il testo in paragrafi. Non usare markdown, non usare titoli interni, non usare asterischi. Solo testo narrativo puro.'
-                            },
-                            {
-                                role: 'user',
-                                content: `Scrivi un breve romanzo (max 500 parole) con il seguente titolo: "${title}". Trama/prompt: ${prompt}. L'autore è ${author}.`
-                            }
-                        ],
-                        temperature: 0.8,
-                        max_tokens: 800
+                        model: 'claude-sonnet-4-6',
+                        max_tokens: 1500,
+                        system: systemPrompt,
+                        messages: [{ role: 'user', content: userPrompt }]
                     })
                 });
 
                 if (!response.ok) {
-                    // Fallback: if API fails, use a local template-based generation
-                    throw new Error('API non disponibile, uso generazione locale');
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `Errore API: ${response.status}`);
                 }
 
                 const data = await response.json();
-                const novelText = data.choices[0].message.content;
-
+                const novelText = data.content.map(b => b.type === 'text' ? b.text : '').join('');
                 displayNovel(novelText);
 
             } catch (error) {
-                console.log('API fallback:', error);
-                // Fallback: Generate a creative novel locally based on the prompt
-                const localNovel = generateLocalNovel(title, author, prompt);
-                displayNovel(localNovel);
+                document.getElementById('loadingSection').classList.remove('active');
+                document.getElementById('inputForm').style.display = 'block';
+                showError('Errore durante la generazione: ' + error.message);
             }
-        }
-
-        function generateLocalNovel(title, author, prompt) {
-            // Local AI simulation using template + prompt keywords
-            const keywords = prompt.split(/\s+/).slice(0, 8).join(', ');
-            const settings = [
-                'una città avvolta nella nebbia', 'un villaggio sulle montagne', 
-                'una metropoli futuristica', 'una piccola isola nel Mediterraneo',
-                'un castello antico', 'una foresta incantata'
-            ];
-            const setting = settings[Math.floor(Math.random() * settings.length)];
-            
-            return `Era una volta, in ${setting}, che la storia di ${title} prese il suo primo respiro. ${author} aveva immaginato questo mondo per anni, tessendo fili di parole che ora danzavano sulla pagina.
-
-La protagonista, una figura enigmatica nata dalla fantasia del prompt "${prompt}", si muoveva tra le ombre e la luce di un mondo che le sfuggiva. Ogni passo che compiva risuonava di un destino più grande di lei, un destino scritto nelle stelle e nelle pagine di un libro antico.
-
-Il vento portava con sé echi di avventure passate e promesse di quelle future. Le strade lastricate di ciottoli raccontavano storie di chi le aveva percorse prima, lasciando impronte indelebili nella memoria del tempo.
-
-Quando il sole calò dietro le colline, tingendo il cielo di sfumature dorate e porpora, il cuore della storia batté più forte. Non era solo un racconto di ${keywords}, ma un viaggio nell'anima umana, nelle sue paure, nei suoi sogni e nella sua incrollabile capacità di sperare.
-
-E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trovò la sua conclusione. Non una fine, ma un nuovo inizio. Per ogni storia che finisce, infinite altre attendono di essere narrate, attendono solo una penna coraggiosa e un lettore pronto a sognare.`;
         }
 
         function displayNovel(text) {
             document.getElementById('loadingSection').classList.remove('active');
-            
-            // Format text into paragraphs
-            const paragraphs = text.split(/\n\n|\n/).filter(p => p.trim().length > 0);
+
+            const paragraphs = text.split(/\n\n+|\n/).filter(p => p.trim().length > 0);
             let htmlContent = '';
-            
-            paragraphs.forEach((para, index) => {
-                // Clean up any markdown or special chars
-                let cleanPara = para.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '').trim();
-                if (cleanPara.length > 0) {
-                    htmlContent += `<p>${escapeHtml(cleanPara)}</p>\n`;
-                }
+            paragraphs.forEach(para => {
+                let clean = para.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '').trim();
+                if (clean.length > 0) htmlContent += `<p>${escapeHtml(clean)}</p>\n`;
             });
 
             currentNovelText = text;
@@ -588,8 +303,7 @@ E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trov�
             document.getElementById('displayTitle').textContent = currentTitle;
             document.getElementById('displayAuthor').textContent = currentAuthor;
             document.getElementById('novelContent').innerHTML = htmlContent;
-            
-            // Count words
+
             const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
             document.getElementById('wordCount').textContent = wordCount + ' parole';
 
@@ -604,69 +318,22 @@ E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trov�
         }
 
         function downloadNovel() {
-            const downloadHTML = `<!DOCTYPE html>
+            const html = `<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <title>${escapeHtml(currentTitle)} - ${escapeHtml(currentAuthor)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Crimson Text', serif;
-            background: #fdf6e3;
-            color: #2c1810;
-            max-width: 700px;
-            margin: 60px auto;
-            padding: 40px;
-            line-height: 1.8;
-        }
-        h1 {
-            font-size: 2.2rem;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .author {
-            text-align: center;
-            font-style: italic;
-            color: #8b4513;
-            margin-bottom: 40px;
-            font-size: 1.1rem;
-        }
-        .ornament {
-            text-align: center;
-            font-size: 1.5rem;
-            color: #d4a574;
-            margin: 20px 0;
-        }
-        p {
-            text-indent: 2em;
-            margin-bottom: 1.2em;
-            font-size: 1.15rem;
-            text-align: justify;
-        }
-        p:first-child {
-            text-indent: 0;
-        }
-        p:first-child::first-letter {
-            font-size: 3rem;
-            float: left;
-            line-height: 0.8;
-            margin-right: 8px;
-            margin-top: 4px;
-            font-weight: 700;
-            color: #8b4513;
-        }
-        .footer {
-            margin-top: 60px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #999;
-            border-top: 1px solid #d4a574;
-            padding-top: 20px;
-        }
-        @media print {
-            body { background: white; }
-        }
+        body { font-family: 'Crimson Text', serif; background: #fdf6e3; color: #2c1810; max-width: 700px; margin: 60px auto; padding: 40px; line-height: 1.8; }
+        h1 { font-size: 2.2rem; text-align: center; margin-bottom: 10px; }
+        .author { text-align: center; font-style: italic; color: #8b4513; margin-bottom: 40px; font-size: 1.1rem; }
+        .ornament { text-align: center; font-size: 1.5rem; color: #d4a574; margin: 20px 0; }
+        p { text-indent: 2em; margin-bottom: 1.2em; font-size: 1.15rem; text-align: justify; }
+        p:first-child { text-indent: 0; }
+        p:first-child::first-letter { font-size: 3rem; float: left; line-height: 0.8; margin-right: 8px; margin-top: 4px; font-weight: 700; color: #8b4513; }
+        .footer { margin-top: 60px; text-align: center; font-size: 0.9rem; color: #999; border-top: 1px solid #d4a574; padding-top: 20px; }
+        @media print { body { background: white; } }
     </style>
 </head>
 <body>
@@ -675,13 +342,10 @@ E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trov�
     <p class="author">di ${escapeHtml(currentAuthor)}</p>
     <div class="ornament">❦</div>
     ${currentNovelHTML}
-    <div class="footer">
-        <p>Generato con AI Novel Generator</p>
-    </div>
+    <div class="footer"><p>Generato con i-Musa AI · Powered by Claude</p></div>
 </body>
 </html>`;
-
-            const blob = new Blob([downloadHTML], { type: 'text/html' });
+            const blob = new Blob([html], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -695,24 +359,18 @@ E così, tra una pagina e l'altra, tra un sospiro e un sorriso, il romanzo trov�
         function resetForm() {
             document.getElementById('novelContainer').classList.remove('active');
             document.getElementById('inputForm').style.display = 'block';
-            document.getElementById('authorName').value = '';
-            document.getElementById('novelTitle').value = '';
-            document.getElementById('prompt').value = '';
             document.getElementById('errorMsg').classList.remove('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function showError(msg) {
-            const errorEl = document.getElementById('errorMsg');
-            errorEl.textContent = msg;
-            errorEl.classList.add('active');
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.classList.add('active');
         }
 
-        // Enter key support
-        document.getElementById('prompt').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                generateNovel();
-            }
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && e.key === 'Enter') generateNovel();
         });
     </script>
 </body>
