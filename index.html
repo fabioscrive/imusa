@@ -69,6 +69,8 @@
   .hero-actions { display:flex;gap:1rem;align-items:center;opacity:0;animation:fadeUp .8s ease forwards 1s; }
   .btn-primary { background:var(--amber);color:var(--black);font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:1rem 2.4rem;text-decoration:none;transition:all .3s;display:inline-block; }
   .btn-primary:hover { background:var(--off-white); }
+  .btn-primary:disabled, .btn-crowd:disabled { border:none;cursor:not-allowed;opacity:.55; }
+  .btn-primary:disabled:hover, .btn-crowd:disabled:hover { background:var(--amber);transform:none; }
   .btn-ghost { color:var(--muted);font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:color .3s;display:flex;align-items:center;gap:.5rem; }
   .btn-ghost:hover { color:var(--off-white); }
 
@@ -190,31 +192,6 @@
   .btn-crowd { display:inline-block;background:var(--amber);color:var(--black);font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;padding:1.15rem 3.2rem;text-decoration:none;font-weight:500;transition:all .3s; }
   .btn-crowd:hover { background:var(--off-white);transform:translateY(-2px); }
 
-  /* BOOKABOOK BADGE */
-  .bookabook-badge {
-    display:flex;flex-direction:column;align-items:center;gap:.8rem;
-    margin:2.5rem auto 2.8rem;
-    padding:1.8rem 2.5rem;
-    border:1px solid rgba(212,168,67,.2);
-    background:rgba(212,168,67,.04);
-    max-width:380px;
-  }
-  .bookabook-label {
-    font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.3em;
-    color:var(--muted);text-transform:uppercase;
-  }
-  .bookabook-link { display:inline-block;transition:opacity .3s; }
-  .bookabook-link:hover { opacity:.75; }
-  .bookabook-logo {
-    height:72px;width:auto;display:block;
-    filter: invert(1) sepia(1) saturate(2) hue-rotate(5deg) brightness(1.1);
-  }
-  .bookabook-sub {
-    font-family:'DM Serif Display',serif;font-style:italic;
-    font-size:.88rem;color:rgba(240,237,230,.5);
-    max-width:260px;line-height:1.6;
-  }
-
   /* AUTORE */
   .autore-section { padding:8rem 6rem;border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:5rem;align-items:center; }
   .autore-photo { width:110px;height:110px;border:1px solid var(--amber);flex-shrink:0;overflow:hidden; }
@@ -281,7 +258,7 @@
       Poi, nel buio dello studio, una voce — calma, precisa, quasi umana. <em>I-Musa</em> sa ascoltare come nessuno mai.
     </p>
     <div class="hero-actions">
-      <a href="https://bookabook.it/libro/i-musa/" class="btn-primary" target="_blank" rel="noopener">Preodinalo su bookabook</a>
+      <button type="button" class="btn-primary" disabled>Coming soon</button>
       <a href="#trama" class="btn-ghost">Scopri di più →</a>
     </div>
   </div>
@@ -424,14 +401,7 @@
     </div>
     <p class="crowd-desc">Con 200 preordini, <em>I-Musa</em> arriva in tutte le librerie d'Italia e negli store online di tutto il mondo. Sii tra i primi a tenerlo in mano.</p>
 
-    <!-- Bookabook section -->
-    <div class="bookabook-badge">
-      <div class="bookabook-label">In crowdfunding su</div>
-      <a href="https://bookabook.it/libro/i-musa/" class="bookabook-link" target="_blank" rel="noopener"><img src="bookabook-logo.jpg" alt="Bookabook" class="bookabook-logo"></a>
-      <div class="bookabook-sub">Sostieni il progetto e aiuta il libro a nascere</div>
-    </div>
-
-    <a href="https://bookabook.it/libro/i-musa/" class="btn-crowd" target="_blank" rel="noopener">Preordina I-Musa →</a>
+    <button type="button" class="btn-crowd" disabled>Coming soon</button>
   </div>
 </section>
 
