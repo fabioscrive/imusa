@@ -109,6 +109,75 @@
   .scroll-line { width:40px;height:1px;background:var(--muted);animation:scrollLine 2s ease-in-out infinite; }
   @keyframes scrollLine { 0%{width:10px;opacity:.3}50%{width:40px;opacity:1}100%{width:10px;opacity:.3} }
 
+
+  /* BOOK 3D RENDER */
+  .book-stage {
+    position:absolute;inset:0;z-index:2;
+    display:flex;align-items:center;justify-content:center;
+    perspective:1600px;pointer-events:none;
+  }
+  .book-float { animation:bookFloat 6s ease-in-out infinite; transform-style:preserve-3d; }
+  .book {
+    --w:clamp(210px,21vw,320px);
+    --h:calc(var(--w) * 1.5306);
+    --d:calc(var(--w) * .15);
+    width:var(--w);height:var(--h);position:relative;
+    transform-style:preserve-3d;
+    transform:rotateX(var(--rx,4deg)) rotateY(var(--ry,30deg));
+    transition:transform .25s ease-out;
+  }
+  .book > div { position:absolute;backface-visibility:hidden; }
+  .book-front {
+    inset:0;transform:translateZ(calc(var(--d) / 2));
+    background:#0c0b08 url(imusa_cover_front.jpg) center/100% 100% no-repeat;
+    border-radius:2px 4px 4px 2px;
+    box-shadow:inset 3px 0 6px rgba(0,0,0,.55), inset -1px 0 0 rgba(255,255,255,.05);
+  }
+  .book-front::after {
+    content:'';position:absolute;inset:0;border-radius:inherit;
+    background:linear-gradient(115deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 32%,rgba(255,255,255,0) 70%,rgba(255,255,255,.05) 100%);
+  }
+  .book-front::before {
+    content:'';position:absolute;top:0;bottom:0;left:3.2%;width:1.6%;z-index:1;
+    background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(255,255,255,.07) 45%,rgba(0,0,0,.25));
+  }
+  .book-back {
+    inset:0;transform:translateZ(calc(var(--d) / -2)) rotateY(180deg);
+    background:#0c0b08 url(imusa_cover_back.jpg) center/100% 100% no-repeat;
+  }
+  .book-spine {
+    width:var(--d);height:100%;left:0;top:0;
+    transform:translateX(calc(var(--d) / -2)) rotateY(-90deg);
+    background:#0c0b08 url(imusa_cover_spine.jpg) center/100% 100% no-repeat;
+    box-shadow:inset 0 0 12px rgba(0,0,0,.6);
+  }
+  .book-pages {
+    width:var(--d);height:calc(100% - 6px);top:3px;right:0;
+    transform:translateX(calc(var(--d) / 2)) rotateY(90deg);
+    background:repeating-linear-gradient(90deg,#efe9da 0 2px,#d9d2bf 2px 3px);
+    box-shadow:inset 0 0 10px rgba(0,0,0,.35);
+  }
+  .book-top,.book-bottom {
+    width:calc(100% - 4px);height:var(--d);left:2px;
+    background:repeating-linear-gradient(0deg,#e8e2d0 0 2px,#cfc8b4 2px 3px);
+  }
+  .book-top { top:0;transform:translateY(calc(var(--d) / -2)) rotateX(90deg);filter:brightness(.9); }
+  .book-bottom { bottom:0;transform:translateY(calc(var(--d) / 2)) rotateX(-90deg);filter:brightness(.55); }
+  .book-shadow {
+    position:absolute;left:50%;bottom:14%;width:62%;height:26px;
+    transform:translateX(-46%);
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.75),transparent 70%);
+    filter:blur(10px);z-index:1;animation:shadowPulse 6s ease-in-out infinite;
+  }
+  .book-glow {
+    position:absolute;left:50%;top:50%;width:70%;aspect-ratio:1;transform:translate(-50%,-50%);
+    background:radial-gradient(circle,rgba(255,176,0,.16),transparent 65%);z-index:1;
+  }
+  @keyframes bookFloat { 0%,100%{transform:translateY(-8px)}50%{transform:translateY(8px)} }
+  @keyframes shadowPulse { 0%,100%{opacity:1;transform:translateX(-46%) scale(1)}50%{opacity:.6;transform:translateX(-46%) scale(.88)} }
+  .btn-buy { display:inline-flex;align-items:center;gap:.7rem; }
+  .btn-buy::after { content:'\2197';font-size:.9rem; }
+
   /* TERMINAL SECTION */
   .terminal-section {
     padding:8rem 6rem;
@@ -207,7 +276,7 @@
     .nav-links{display:none;}
     .hero{grid-template-columns:1fr;}
     .hero-left{padding:9rem 2rem 4rem;}
-    .hero-right{height:300px;}
+    .hero-right{height:420px;}
     .terminal-section,.trama-grid,.scenes-strip,.autore-section{grid-template-columns:1fr;}
     .terminal-section,.trama-section,.estratto-section,.autore-section{padding:5rem 2rem;}
     footer{padding:2rem;flex-direction:column;gap:1rem;text-align:center;}
@@ -243,7 +312,7 @@
       Poi, nel buio dello studio, una voce calma, precisa, quasi umana. <em>I-Musa</em> sa ascoltare come nessuno mai.
     </p>
     <div class="hero-actions">
-      <button type="button" class="btn-primary" disabled>Coming soon</button>
+      <a href="https://www.amazon.it/dp/B0HKWGFBB7" class="btn-primary btn-buy" target="_blank" rel="noopener">Acquistalo su Amazon</a>
       <a href="#trama" class="btn-ghost">Scopri di più →</a>
     </div>
   </div>
@@ -253,6 +322,20 @@
     <img class="hero-img-metro" src="imusa_scene1_metro.jpg" alt="Leo Vasari in metropolitana, circondato da persone che leggono il suo libro">
     <div class="hero-right-overlay"></div>
     <div class="hero-right-overlay-bottom"></div>
+    <div class="book-glow"></div>
+    <div class="book-shadow"></div>
+    <div class="book-stage" aria-label="Copertina del libro i-Musa di Fabio Bisesti">
+      <div class="book-float">
+        <div class="book" id="book">
+          <div class="book-back"></div>
+          <div class="book-spine"></div>
+          <div class="book-pages"></div>
+          <div class="book-top"></div>
+          <div class="book-bottom"></div>
+          <div class="book-front"></div>
+        </div>
+      </div>
+    </div>
     <div class="hero-vertical-text">Ultima sessione attiva: 01.46</div>
   </div>
 
@@ -405,6 +488,18 @@
     const x=(e.clientX/window.innerWidth-.5)*12;
     img.style.transform=`scale(1.05) translateX(${x}px)`;
   });
+
+
+  // Book tilt
+  (function(){
+    const book=document.getElementById('book');
+    if(!book)return;
+    document.addEventListener('mousemove',e=>{
+      const nx=e.clientX/window.innerWidth-.5, ny=e.clientY/window.innerHeight-.5;
+      book.style.setProperty('--ry',(30+nx*22)+'deg');
+      book.style.setProperty('--rx',(4-ny*12)+'deg');
+    });
+  })();
 
   // Scroll reveal
   const revObs=new IntersectionObserver(entries=>{
