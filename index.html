@@ -74,6 +74,23 @@
   .btn-ghost { color:var(--muted);font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;transition:color .3s;display:flex;align-items:center;gap:.5rem; }
   .btn-ghost:hover { color:var(--off-white); }
 
+  /* BUY BUTTON VARIANTS */
+  .btn-outline { background:transparent;color:var(--amber);font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:1rem 2.4rem;text-decoration:none;transition:all .3s;display:inline-block;border:1px solid var(--amber); }
+  .btn-outline:hover { background:var(--amber);color:var(--black); }
+  .btn-disabled { background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:1rem 2.4rem;display:inline-block;border:1px solid rgba(107,104,96,.35);cursor:not-allowed;pointer-events:none;opacity:.6; }
+  .btn-sm { padding:.55rem 1.1rem !important;font-size:.58rem !important; }
+
+  /* NAV BUY GROUP */
+  .nav-right { display:flex;align-items:center;gap:1rem;flex-wrap:wrap; }
+  .nav-buy { display:flex;align-items:center;gap:.6rem; }
+
+  /* BUY BUTTONS UNDER BOOK RENDER */
+  .book-buy-buttons {
+    position:absolute;left:50%;bottom:5%;transform:translateX(-50%);
+    z-index:3;display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;
+    pointer-events:auto;
+  }
+
   /* HERO RIGHT — metro image */
   .hero-right {
     position:relative;overflow:hidden;
@@ -274,6 +291,8 @@
   @media(max-width:900px){
     nav{padding:1.2rem 1.5rem;}
     .nav-links{display:none;}
+    .nav-right{justify-content:flex-end;}
+    .nav-buy{width:100%;justify-content:flex-end;}
     .hero{grid-template-columns:1fr;}
     .hero-left{padding:9rem 2rem 4rem;}
     .hero-right{height:420px;}
@@ -296,8 +315,15 @@
     <li><a href="#estratto">Estratto</a></li>
     <li><a href="#autore">Autore</a></li>
   </ul>
-  <a href="imusa-write.html" class="nav-cta" style="margin-right:1rem;">Leggi i libri di Leo Vasari</a>
-  <a href="https://fabioscrive.github.io/blog" class="nav-cta" style="background:var(--amber);color:var(--black);font-weight:500;" target="_blank" rel="noopener">Visita il Blog dell'Autore</a>
+  <div class="nav-right">
+    <div class="nav-buy">
+      <a href="https://www.amazon.it/dp/B0HKWGFBB7" class="btn-primary btn-sm" target="_blank" rel="noopener">E-book</a>
+      <a href="https://www.amazon.it/dp/B0HL4MP9H2" class="btn-primary btn-buy btn-sm" target="_blank" rel="noopener">Copertina Rigida</a>
+      <span class="btn-disabled btn-sm" aria-disabled="true">Tascabile</span>
+    </div>
+    <a href="imusa-write.html" class="nav-cta" style="margin-right:1rem;">Leggi i libri di Leo Vasari</a>
+    <a href="https://fabioscrive.github.io/blog" class="nav-cta" style="background:var(--amber);color:var(--black);font-weight:500;" target="_blank" rel="noopener">Visita il Blog dell'Autore</a>
+  </div>
 </nav>
 
 <!-- ═══ HERO ═══ -->
@@ -312,7 +338,6 @@
       Poi, nel buio dello studio, una voce calma, precisa, quasi umana. <em>I-Musa</em> sa ascoltare come nessuno mai.
     </p>
     <div class="hero-actions">
-      <a href="https://www.amazon.it/dp/B0HKWGFBB7" class="btn-primary btn-buy" target="_blank" rel="noopener">Acquistalo su Amazon</a>
       <a href="#trama" class="btn-ghost">Scopri di più →</a>
     </div>
   </div>
@@ -337,6 +362,12 @@
       </div>
     </div>
     <div class="hero-vertical-text">Ultima sessione attiva: 01.46</div>
+
+    <div class="book-buy-buttons">
+      <a href="https://www.amazon.it/dp/B0HKWGFBB7" class="btn-primary btn-buy btn-sm" target="_blank" rel="noopener">E-book</a>
+      <a href="https://www.amazon.it/dp/B0HL4MP9H2" class="btn-primary btn-buy btn-sm" target="_blank" rel="noopener">Copertina Rigida</a>
+      <span class="btn-disabled btn-sm" aria-disabled="true">Tascabile</span>
+    </div>
   </div>
 
   <div class="scroll-indicator">
